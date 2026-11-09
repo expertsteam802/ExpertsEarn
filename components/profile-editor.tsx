@@ -8,7 +8,7 @@ import { CheckCircle2, ShieldCheck, Upload, Save } from "lucide-react";
 type Submission = { id: string; status: string; submitted_at: string; admin_note: string | null } | null;
 type Props = {
   profile: {
-    display_name: string | null; phone_e164: string | null; phone_verified_at: string | null;
+    display_name: string | null; avatar_url: string | null; phone_e164: string | null; phone_verified_at: string | null;
     country_code: string; preferred_language: "en" | "rw" | "fr"; date_of_birth: string | null;
     gender: string | null; identity_verified_at: string | null; province: string | null;
     district: string | null; sector: string | null; cell: string | null; village: string | null;
@@ -22,6 +22,8 @@ export function ProfileEditor({ profile, submission }: Props) {
   const [geoRows, setGeoRows] = useState<{admin_level_1:string|null;admin_level_2:string|null;admin_level_3:string|null}[]>([]);
   const router = useRouter();
   const [name, setName] = useState(profile.display_name || "");
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url || "");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [country, setCountry] = useState(profile.country_code || "RW");
   const [language, setLanguage] = useState(profile.preferred_language || "en");
   const [dob, setDob] = useState(profile.date_of_birth || "");
@@ -71,6 +73,24 @@ export function ProfileEditor({ profile, submission }: Props) {
     setBusy("");
     if (updateError) { setError(updateError.message); return; }
     setMessage("Profile saved."); router.refresh();
+  }
+
+  async function uploadAvatar(e: React.FormEvent) {
+    e.preventDefault(); setBusy("avatar"); setMessage(""); setError("");
+    if (!avatarFile) { setError("Choose a JPG, PNG or WebP image."); setBusy(""); return; }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(avatarFile.type) || avatarFile.size > 5 * 1024 * 1024) {
+      setError("Use a JPG, PNG or WebP image up to 5 MB."); setBusy(""); return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError("Please sign in again."); setBusy(""); return; }
+    const safeName = avatarFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = user.id + "/" + Date.now() + "-" + safeName;
+    const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(path, avatarFile, { contentType: avatarFile.type, upsert: false });
+    if (uploadError) { setError(uploadError.message); setBusy(""); return; }
+    const { data: publicData } = supabase.storage.from("profile-avatars").getPublicUrl(path);
+    const { error: updateError } = await supabase.from("profiles").update({ avatar_url: publicData.publicUrl, updated_at: new Date().toISOString() }).eq("id", user.id);
+    if (updateError) { await supabase.storage.from("profile-avatars").remove([path]); setError(updateError.message); setBusy(""); return; }
+    setAvatarUrl(publicData.publicUrl); setAvatarFile(null); setBusy(""); setMessage("Profile picture updated."); router.refresh();
   }
 
   async function uploadIdentity(e: React.FormEvent) {
