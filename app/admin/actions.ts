@@ -58,7 +58,7 @@ export async function updatePlatformSetting(formData: FormData) {
   try { value = JSON.parse(raw); } catch { redirect("/admin?error=setting_must_be_valid_json#settings"); }
   if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) redirect("/admin?error=daily_cap_must_be_1_to_500#settings");
   if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) redirect("/admin?error=minimum_payout_out_of_range#settings");
-  const { error } = await supabase.from("platform_settings").update({ value, updated_at: new Date().toISOString() }).eq("key", key);
+  const { error } = await supabase.from("platform_settings").update({ value: value as any, updated_at: new Date().toISOString() }).eq("key", key);
   if (error) redirect("/admin?error=" + encodeURIComponent(error.message) + "#settings");
   redirect("/admin?settings_saved=1#settings");
 }
