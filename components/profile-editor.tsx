@@ -18,7 +18,8 @@ type Props = {
 };
 
 export function ProfileEditor({ profile, submission }: Props) {
-  const supabase = useMemo(() => createClient(), []);\n  const [geoRows, setGeoRows] = useState<{admin_level_1:string|null;admin_level_2:string|null;admin_level_3:string|null}[]>([]);
+  const supabase = useMemo(() => createClient(), []);
+  const [geoRows, setGeoRows] = useState<{admin_level_1:string|null;admin_level_2:string|null;admin_level_3:string|null}[]>([]);
   const router = useRouter();
   const [name, setName] = useState(profile.display_name || "");
   const [country, setCountry] = useState(profile.country_code || "RW");
@@ -29,7 +30,10 @@ export function ProfileEditor({ profile, submission }: Props) {
   const [district, setDistrict] = useState(profile.district || "");
   const [sector, setSector] = useState(profile.sector || "");
   const [cell, setCell] = useState(profile.cell || "");
-  const [village, setVillage] = useState(profile.village || "");\n  const provinces = Array.from(new Set(geoRows.map(row => row.admin_level_1).filter((value): value is string => !!value))).sort();\n  const districts = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province).map(row => row.admin_level_2).filter((value): value is string => !!value))).sort();\n  const sectors = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province && row.admin_level_2 === district).map(row => row.admin_level_3).filter((value): value is string => !!value))).sort();
+  const [village, setVillage] = useState(profile.village || "");
+  const provinces = Array.from(new Set(geoRows.map(row => row.admin_level_1).filter((value): value is string => !!value))).sort();
+  const districts = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province).map(row => row.admin_level_2).filter((value): value is string => !!value))).sort();
+  const sectors = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province && row.admin_level_2 === district).map(row => row.admin_level_3).filter((value): value is string => !!value))).sort();
   const [region, setRegion] = useState(profile.region || "");
   const [city, setCity] = useState(profile.city || "");
   const [phone, setPhone] = useState(profile.phone_e164 || "");
@@ -38,7 +42,17 @@ export function ProfileEditor({ profile, submission }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");\n\n  useEffect(() => {\n    let active = true;\n    async function loadRwandaGeography() {\n      const { data, error: geographyError } = await supabase.from("geography").select("admin_level_1,admin_level_2,admin_level_3").eq("country_code", "RW").not("admin_level_1", "is", null).limit(1000);\n      if (active && !geographyError) setGeoRows(data || []);\n    }\n    void loadRwandaGeography();\n    return () => { active = false; };\n  }, [supabase]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    async function loadRwandaGeography() {
+      const { data, error: geographyError } = await supabase.from("geography").select("admin_level_1,admin_level_2,admin_level_3").eq("country_code", "RW").not("admin_level_1", "is", null).limit(1000);
+      if (active && !geographyError) setGeoRows(data || []);
+    }
+    void loadRwandaGeography();
+    return () => { active = false; };
+  }, [supabase]);
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault(); setBusy("profile"); setMessage(""); setError("");
