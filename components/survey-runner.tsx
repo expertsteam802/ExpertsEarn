@@ -18,6 +18,21 @@ export function SurveyRunner({ responseId, questions }: { surveyId: string; resp
   const current = questions[step];
   const setAnswer = (id: string, value: any) => setAnswers((previous) => ({ ...previous, [id]: value }));
 
+  async function saveCurrentAnswer() {
+    if (!current || answers[current.id] === undefined) return true;
+    const { error: saveError } = await supabase.from("response_answers").upsert({ response_id: responseId, survey_question_id: current.id, answer: answers[current.id] }, { onConflict: "response_id,survey_question_id" });
+    if (saveError) { setError(saveError.message); return false; }
+    return true;
+  }
+
+  async function goNext() {
+    if (current.required && (value === undefined || value === "" || (Array.isArray(value) && value.length === 0))) { setError("Please answer this required question."); return; }
+    setBusy(true); setError("");
+    const saved = await saveCurrentAnswer();
+    if (saved) setStep((currentStep) => currentStep + 1);
+    setBusy(false);
+  }
+
   async function submit() {
     setBusy(true); setError("");
     for (const question of questions) {
@@ -57,7 +72,7 @@ export function SurveyRunner({ responseId, questions }: { surveyId: string; resp
     <p className="text-xs leading-5 text-slate-400">Advertisements may appear in standard site placements. Survey completion rewards are for your answers, never for ad views or clicks.</p>
     {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
     <div className="flex gap-3"><button type="button" disabled={busy || step === 0} onClick={() => { setError(""); setStep((currentStep) => currentStep - 1); }} className="min-h-12 rounded-xl border border-slate-200 px-5 font-bold text-slate-700 disabled:opacity-40">Previous</button>
-      {step < questions.length - 1 ? <button type="button" disabled={busy} onClick={() => { if (current.required && (value === undefined || value === "" || (Array.isArray(value) && value.length === 0))) { setError("Please answer this required question."); return; } setError(""); setStep((currentStep) => currentStep + 1); }} className="min-h-12 flex-1 rounded-xl bg-forest px-5 font-bold text-white">Next question</button>
+      {step < questions.length - 1 ? <button type="button" disabled={busy} onClick={goNext} className="min-h-12 flex-1 rounded-xl bg-forest px-5 font-bold text-white disabled:opacity-60">{busy ? "Saving…" : "Next question"}</button>
       : <button type="button" disabled={busy} onClick={submit} className="min-h-12 flex-1 rounded-xl bg-forest px-5 font-bold text-white disabled:opacity-60">{busy ? "Submitting…" : "Submit answers"}</button>}
     </div>
   </div>;
