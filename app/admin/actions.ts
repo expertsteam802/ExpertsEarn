@@ -52,7 +52,7 @@ export async function updatePlatformSetting(formData: FormData) {
   if (!user) redirect("/login");
   const key = String(formData.get("key") || "");
   const raw = String(formData.get("value") || "");
-  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding"];
+  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding", "location_cpm_rates"];
   if (!allowed.includes(key)) return {ok:false,error:"This setting is not allowed."};
   let value: unknown;
   try { value = JSON.parse(raw); } catch { return {ok:false,error:"Enter valid JSON before saving."}; }
