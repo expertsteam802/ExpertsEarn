@@ -1,0 +1,3 @@
+import Link from "next/link";
+import { AuthForm } from "@/components/auth-form";
+export default function LoginPage() { return <main className="grid min-h-screen place-items-center px-5 py-12"><div className="w-full max-w-md"><Link href="/" className="font-black text-forest">ExpertsEarn</Link><div className="surface mt-6 p-8"><h1 className="text-2xl font-black text-slate-950">Welcome back</h1><p className="mb-7 mt-2 text-sm text-slate-500">Log in to continue earning with your opinions.</p><AuthForm mode="login"/></div></div></main>; }
