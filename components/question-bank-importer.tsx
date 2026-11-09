@@ -60,8 +60,8 @@ export function QuestionBankImporter() {
       });
       setTotal(rows.length);
       let inserted = 0;
-      for (let offset = 0; offset < rows.length; offset += 500) {
-        inserted += await importQuestions(rows.slice(offset, offset + 500));
+      for (let offset = 0; offset < rows.length; offset += 100) {
+        inserted += await importQuestions(rows.slice(offset, offset + 100));
         setProgress(inserted);
       }
       setMessage("Successfully imported " + inserted.toLocaleString() + " questions.");
@@ -73,7 +73,7 @@ export function QuestionBankImporter() {
 
   return <section className="surface p-6">
     <h2 className="text-lg font-black text-slate-950">Bulk question import</h2>
-    <p className="mt-2 text-sm leading-6 text-slate-500">Upload a CSV with up to 10,000+ questions. The importer validates each row and writes in safe batches of 500.</p>
+    <p className="mt-2 text-sm leading-6 text-slate-500">Upload a CSV with up to 10,000+ questions. The importer validates each row and writes in safe batches of 100.</p>
     <p className="mt-2 text-xs text-slate-500">Columns: prompt, prompt_rw, prompt_fr, question_type, options, difficulty, language, category_slug. Options must be a JSON array.</p>
     <a href="/question-bank-template.csv" className="mt-3 inline-block text-sm font-bold text-forest underline">Download CSV template</a>
     <input type="file" accept=".csv,text/csv" onChange={(event) => setFile(event.target.files?.[0] || null)} className="mt-4 block w-full text-sm"/>
