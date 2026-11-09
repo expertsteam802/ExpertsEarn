@@ -79,3 +79,20 @@ export async function updateSurveyTerms(formData: FormData) {
   if (error) redirect("/admin?error=" + encodeURIComponent(error.message) + "#surveys");
   redirect("/admin?survey_updated=1#surveys");
 }
+
+
+export async function bulkUpdateSurveyStatus(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const ids = formData.getAll("survey_ids").map(String).filter(Boolean);
+  const status = String(formData.get("status") || "");
+  if (!ids.length || ids.length > 50 || !["active", "paused", "archived"].includes(status)) {
+    redirect("/admin?tab=surveys&error=select_valid_surveys");
+  }
+  for (const surveyId of ids) {
+    const { error } = await supabase.rpc("admin_set_survey_status", { p_survey_id: surveyId, p_status: status });
+    if (error) redirect("/admin?tab=surveys&error=" + encodeURIComponent(error.message));
+  }
+  redirect("/admin?tab=surveys&survey_updated=1");
+}
