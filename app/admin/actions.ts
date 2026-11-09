@@ -78,3 +78,20 @@ export async function bulkUpdateSurveyStatus(formData: FormData) {
   for(const surveyId of ids){const {error}=await supabase.rpc("admin_set_survey_status",{p_survey_id:surveyId,p_status:status});if(error)return {ok:false,error:error.message};}
   return {ok:true,message:ids.length+" surveys updated."};
 }
+
+export async function bulkUpdateSurveyRewards(formData: FormData) {
+  const supabase=createClient();
+  const {data:{user}}=await supabase.auth.getUser();
+  if(!user) return {ok:false,error:"Please sign in again."};
+  const ids=formData.getAll("survey_ids").map(String).filter(Boolean);
+  const reward=Number(formData.get("reward_rwf"));
+  if(!ids.length||ids.length>50||!Number.isSafeInteger(reward)||reward<0||reward>1000000) return {ok:false,error:"Select 1–50 draft or paused surveys and enter a reward from 0 to 1,000,000 RWF."};
+  const {data:surveys,error:loadError}=await supabase.from("surveys").select("id,response_limit,status").in("id",ids);
+  if(loadError||!surveys||surveys.length!==ids.length) return {ok:false,error:loadError?.message||"Could not load the selected surveys."};
+  if(surveys.some(s=>!["draft","paused"].includes(s.status))) return {ok:false,error:"Pause active surveys before changing their rewards."};
+  for(const survey of surveys){
+    const {error}=await supabase.rpc("admin_update_survey_terms",{p_survey_id:survey.id,p_reward_rwf:reward,p_response_limit:survey.response_limit});
+    if(error) return {ok:false,error:error.message};
+  }
+  return {ok:true,message:"Reward updated for "+surveys.length+" surveys."};
+}
