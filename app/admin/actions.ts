@@ -32,3 +32,33 @@ export async function setSurveyStatus(formData: FormData) {
   if (error) redirect("/admin?error=" + encodeURIComponent(error.message));
   redirect("/admin?survey_updated=1");
 }
+
+
+export async function updateUserRole(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const userId = String(formData.get("user_id") || "");
+  const role = String(formData.get("role") || "");
+  if (!userId || !["respondent", "partner", "admin"].includes(role)) redirect("/admin?error=invalid_user_role");
+  const { error } = await supabase.rpc("admin_update_profile_role", { p_user_id: userId, p_role: role });
+  if (error) redirect("/admin?error=" + encodeURIComponent(error.message));
+  redirect("/admin?user_updated=1#users");
+}
+
+export async function updatePlatformSetting(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const key = String(formData.get("key") || "");
+  const raw = String(formData.get("value") || "");
+  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding"];
+  if (!allowed.includes(key)) redirect("/admin?error=setting_not_allowed#settings");
+  let value: unknown;
+  try { value = JSON.parse(raw); } catch { redirect("/admin?error=setting_must_be_valid_json#settings"); }
+  if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) redirect("/admin?error=daily_cap_must_be_1_to_500#settings");
+  if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) redirect("/admin?error=minimum_payout_out_of_range#settings");
+  const { error } = await supabase.from("platform_settings").update({ value, updated_at: new Date().toISOString() }).eq("key", key);
+  if (error) redirect("/admin?error=" + encodeURIComponent(error.message) + "#settings");
+  redirect("/admin?settings_saved=1#settings");
+}
