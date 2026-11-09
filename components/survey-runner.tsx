@@ -19,8 +19,14 @@ export function SurveyRunner({ responseId, questions }: { surveyId: string; resp
   const setAnswer = (id: string, value: any) => setAnswers((previous) => ({ ...previous, [id]: value }));
 
   async function saveCurrentAnswer() {
-    if (!current || answers[current.id] === undefined) return true;
-    const { error: saveError } = await supabase.from("response_answers").upsert({ response_id: responseId, survey_question_id: current.id, answer: answers[current.id] }, { onConflict: "response_id,survey_question_id" });
+    if (!current) return true;
+    const answer = answers[current.id];
+    if (answer === undefined || answer === "") {
+      const { error: deleteError } = await supabase.from("response_answers").delete().eq("response_id", responseId).eq("survey_question_id", current.id);
+      if (deleteError) { setError(deleteError.message); return false; }
+      return true;
+    }
+    const { error: saveError } = await supabase.from("response_answers").upsert({ response_id: responseId, survey_question_id: current.id, answer }, { onConflict: "response_id,survey_question_id" });
     if (saveError) { setError(saveError.message); return false; }
     return true;
   }
