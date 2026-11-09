@@ -29,7 +29,7 @@ export default async function QuestionBankPage({ searchParams }: { searchParams:
       <form action={generateStarterSurveys} className="mt-4 flex flex-wrap items-end gap-3">
         <label className="text-sm font-semibold">Survey count<input name="survey_count" type="number" min="1" max="100" defaultValue="100" className="mt-2 block w-28 rounded-xl border border-slate-200 p-3"/></label>
         <label className="text-sm font-semibold">Questions per survey<input name="question_count" type="number" min="1" max="100" defaultValue="20" className="mt-2 block w-36 rounded-xl border border-slate-200 p-3"/></label>
-        <label className="text-sm font-semibold">Reward per completed survey (RWF)<input name="reward_rwf" type="number" min="0" max="1000000" defaultValue="1000" className="mt-2 block w-48 rounded-xl border border-slate-200 p-3"/></label>
+        <label className="text-sm font-semibold">Reward per completed survey (RWF)<input name="reward_rwf" type="number" min="0" max="1000000" required placeholder="Enter reward" className="mt-2 block w-48 rounded-xl border border-slate-200 p-3"/></label>
         <button className="rounded-xl bg-forest px-5 py-3 font-bold text-white">Generate starter set</button>
       </form>
     </section>
