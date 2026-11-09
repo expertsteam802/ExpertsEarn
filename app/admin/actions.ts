@@ -49,6 +49,12 @@ export async function updatePlatformSetting(formData: FormData) {
   try { value = JSON.parse(raw); } catch { return {ok:false,error:"Enter valid JSON before saving."}; }
   if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) return {ok:false,error:"Daily survey cap must be between 1 and 500."};
   if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) return {ok:false,error:"Minimum payout must be between 1,000 and 10,000,000 RWF."};
+  if (key === "location_cpm_rates") {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {ok:false,error:"Location CPM settings must be a JSON object."};
+    const config=value as {default_floor_usd?:number;countries?:Record<string,{floor_cpm_usd?:number}>};
+    if (typeof config.default_floor_usd!=="number" || !Number.isFinite(config.default_floor_usd) || config.default_floor_usd<0 || config.default_floor_usd>1000 || !config.countries || typeof config.countries!=="object" || Array.isArray(config.countries)) return {ok:false,error:"Set a valid default_floor_usd and countries object."};
+    for (const [country,rate] of Object.entries(config.countries)) if (!/^[A-Z]{2}$/.test(country) || !rate || typeof rate.floor_cpm_usd!=="number" || !Number.isFinite(rate.floor_cpm_usd) || rate.floor_cpm_usd<0 || rate.floor_cpm_usd>1000) return {ok:false,error:"Each country must use a two-letter ISO code and a non-negative floor_cpm_usd."};
+  }
   const { error } = await supabase.from("platform_settings").update({ value: value as any, updated_at: new Date().toISOString() }).eq("key", key);
   if (error) return {ok:false,error:error.message};
   return {ok:true,message:"Setting saved."};
