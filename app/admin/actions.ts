@@ -62,3 +62,20 @@ export async function updatePlatformSetting(formData: FormData) {
   if (error) redirect("/admin?error=" + encodeURIComponent(error.message) + "#settings");
   redirect("/admin?settings_saved=1#settings");
 }
+
+
+export async function updateSurveyTerms(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const surveyId = String(formData.get("survey_id") || "");
+  const reward = Number(formData.get("reward_rwf"));
+  const limitRaw = String(formData.get("response_limit") || "").trim();
+  const limit = limitRaw ? Number(limitRaw) : null;
+  if (!surveyId || !Number.isInteger(reward) || (limit !== null && !Number.isInteger(limit))) redirect("/admin?error=invalid_survey_terms#surveys");
+  const { error } = await supabase.rpc("admin_update_survey_terms", {
+    p_survey_id: surveyId, p_reward_rwf: reward, p_response_limit: limit
+  });
+  if (error) redirect("/admin?error=" + encodeURIComponent(error.message) + "#surveys");
+  redirect("/admin?survey_updated=1#surveys");
+}
