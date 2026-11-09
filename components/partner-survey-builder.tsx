@@ -25,6 +25,11 @@ export function PartnerSurveyBuilder() {
       <label className="text-sm font-semibold">Target country code<input name="target_country" maxLength={2} placeholder="RW" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Target region / province<input name="target_region" maxLength={120} placeholder="Kigali City" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Target city / district<input name="target_city" maxLength={120} placeholder="Gasabo" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+      <label className="text-sm font-semibold">Rwanda province<input name="target_province" maxLength={120} placeholder="Kigali City" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+      <label className="text-sm font-semibold">Rwanda district<input name="target_district" maxLength={120} placeholder="Gasabo" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+      <label className="text-sm font-semibold">Rwanda sector<input name="target_sector" maxLength={120} placeholder="Kimihurura" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+      <label className="text-sm font-semibold">Rwanda cell<input name="target_cell" maxLength={120} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+      <label className="text-sm font-semibold">Rwanda village<input name="target_village" maxLength={120} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Minimum age<input name="min_age" type="number" min="13" max="100" placeholder="18" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Maximum age<input name="max_age" type="number" min="13" max="100" placeholder="65" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold sm:col-span-2">Questions (JSON)<textarea name="questions_json" required value={questions} onChange={event => setQuestions(event.target.value)} rows={12} spellCheck={false} className="mt-2 w-full rounded-xl border border-slate-200 p-3 font-mono text-xs leading-5" /></label>
