@@ -9,11 +9,11 @@ export function createClient() {
     {
       cookies: {
         get(name: string) { return cookieStore.get(name)?.value; },
-        set(name: string, value: string, options: Record<string, unknown>) {
-          try { cookieStore.set({ name, value, ...(options as object) }); } catch {}
+        set(name: string, value: string, options: any) {
+          try { cookieStore.set({ name, value, ...options }); } catch {}
         },
-        remove(name: string, options: Record<string, unknown>) {
-          try { cookieStore.set({ name, value: "", ...(options as object) }); } catch {}
+        remove(name: string, options: any) {
+          try { cookieStore.set({ name, value: "", ...options }); } catch {}
         }
       }
     }
