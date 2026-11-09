@@ -59,9 +59,10 @@ export async function createRandomSurvey(formData: FormData) {
   if (!user) redirect("/login");
   const title = String(formData.get("title") || "").trim();
   const language = String(formData.get("language") || "en");
-  const reward = Number(formData.get("reward_rwf") || 0);
+  const rewardRaw = String(formData.get("reward_rwf") ?? "").trim();
+  const reward = Number(rewardRaw);
   const questionCount = Number(formData.get("question_count") || 20);
-  if (!title || !Number.isSafeInteger(reward) || !Number.isInteger(questionCount)) {
+  if (!title || !rewardRaw || !Number.isSafeInteger(reward) || reward < 0 || reward > 1000000 || !Number.isInteger(questionCount)) {
     redirect("/admin/questions?error=invalid");
   }
   const { data, error } = await supabase.rpc("admin_create_random_survey", {
