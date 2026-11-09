@@ -21,12 +21,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Provide a title and between 1 and 100 questions" }, { status: 400 });
   }
   const allowed = new Set(["single_choice","multiple_choice","text","number","rating","yes_no"]);
-  if (body.questions.some((question: any) => typeof question.prompt !== "string" || !question.prompt.trim() || !allowed.has(question.type || "text"))) {
+  if (body.questions.some((question: any) => {
+    if (typeof question.prompt !== "string" || !question.prompt.trim() || question.prompt.length > 2000 || !allowed.has(question.type || "text")) return true;
+    const type = question.type || "text";
+    if (type === "single_choice" || type === "multiple_choice") {
+      const options = question.options;
+      return !Array.isArray(options) || options.length < 2 || options.length > 30 || !options.every((option: any) => typeof option === "string" ? option.trim().length > 0 : option && typeof option.label === "string" && typeof option.value === "string" && option.label.trim().length > 0 && option.value.trim().length > 0);
+    }
+    return false;
+  })) {
     return NextResponse.json({ error: "Each question needs a prompt and a supported question type" }, { status: 400 });
   }
   const price = body.partner_price_usd === undefined ? 0.2 : Number(body.partner_price_usd);
   if (!Number.isFinite(price) || price < 0.2 || price > 0.5) {
     return NextResponse.json({ error: "Price per completed response must be between $0.20 and $0.50." }, { status: 400 });
+  }
+  const responseLimit = body.response_limit === undefined || body.response_limit === null ? null : Number(body.response_limit);
+  const minAge = body.min_age === undefined || body.min_age === null ? null : Number(body.min_age);
+  const maxAge = body.max_age === undefined || body.max_age === null ? null : Number(body.max_age);
+  if ((responseLimit !== null && (!Number.isInteger(responseLimit) || responseLimit < 1 || responseLimit > 100000)) || (minAge !== null && (!Number.isInteger(minAge) || minAge < 13 || minAge > 100)) || (maxAge !== null && (!Number.isInteger(maxAge) || maxAge < 13 || maxAge > 100)) || (minAge !== null && maxAge !== null && minAge > maxAge)) {
+    return NextResponse.json({ error: "Response limit and age targeting values are invalid." }, { status: 400 });
   }
   const surveyPayload = {
     owner_id: auth.partnerUserId, partner_id: auth.partnerUserId,
@@ -36,8 +50,8 @@ export async function POST(request: NextRequest) {
     target_city: body.target_city || null, target_province: body.target_province || null,
     target_district: body.target_district || null, target_sector: body.target_sector || null,
     target_cell: body.target_cell || null, target_village: body.target_village || null,
-    min_age: body.min_age ?? null, max_age: body.max_age ?? null,
-    target_gender: body.target_gender || null, response_limit: body.response_limit ?? null,
+    min_age: minAge, max_age: maxAge,
+    target_gender: body.target_gender || null, response_limit: responseLimit,
     reward_rwf: Math.max(0, Math.floor(Number(body.reward_rwf) || 0)),
     partner_price_usd: price, question_count: body.questions.length, is_random_session: false
   };
