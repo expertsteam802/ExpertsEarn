@@ -1,4 +1,34 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-export default async function ProfilePage(){const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");const {data:p}=await supabase.from("profiles").select("*").eq("id",user.id).maybeSingle();return <main className="min-h-screen py-10"><div className="container max-w-xl"><Link href="/dashboard" className="text-sm font-bold text-forest">← Dashboard</Link><section className="surface mt-5 p-7"><h1 className="text-2xl font-black text-slate-950">Your profile</h1><p className="mt-2 text-sm text-slate-500">Keep your details current so surveys can match you accurately.</p><dl className="mt-7 space-y-4">{[["Name",p?.display_name||"Not set"],["Email",user.email||"Not available"],["Phone",p?.phone_e164||"Not verified"],["Country",p?.country_code||"RW"],["Language",(p?.preferred_language||"en").toUpperCase()],["Account type",p?.role||"respondent"]].map(([k,v])=><div key={k} className="flex justify-between gap-4 border-b border-slate-100 pb-3"><dt className="text-sm text-slate-500">{k}</dt><dd className="text-right text-sm font-bold text-slate-800">{v}</dd></div>)}</dl><p className="mt-5 text-xs text-slate-400">Profile editing and phone OTP verification will be enabled in the next implementation pass.</p></section></div></main>;}
+import { ProfileEditor } from "@/components/profile-editor";
+
+export default async function ProfilePage() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const [{ data: profile }, { data: submissions }] = await Promise.all([
+    supabase.from("profiles").select("display_name,phone_e164,phone_verified_at,country_code,preferred_language,date_of_birth,gender,identity_verified_at").eq("id", user.id).maybeSingle(),
+    supabase.from("identity_verification_submissions").select("id,status,submitted_at,admin_note").eq("user_id", user.id).order("submitted_at", { ascending: false }).limit(1)
+  ]);
+
+  return <main className="min-h-screen py-10">
+    <div className="container max-w-2xl">
+      <Link href="/dashboard" className="text-sm font-bold text-forest">← Dashboard</Link>
+      <h1 className="mt-5 text-3xl font-black text-slate-950">Your profile</h1>
+      <p className="mt-2 text-sm text-slate-500">Manage your details, verify your phone, and complete identity checks before your first payout.</p>
+      <div className="mt-4 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">Signed in as <strong>{user.email}</strong></div>
+      <ProfileEditor profile={{
+        display_name: profile?.display_name ?? null,
+        phone_e164: profile?.phone_e164 ?? null,
+        phone_verified_at: profile?.phone_verified_at ?? null,
+        country_code: profile?.country_code ?? "RW",
+        preferred_language: (profile?.preferred_language ?? "en") as "en"|"rw"|"fr",
+        date_of_birth: profile?.date_of_birth ?? null,
+        gender: profile?.gender ?? null,
+        identity_verified_at: profile?.identity_verified_at ?? null
+      }} submission={submissions?.[0] ?? null}/>
+    </div>
+  </main>;
+}
