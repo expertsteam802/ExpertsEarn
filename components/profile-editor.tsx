@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CheckCircle2, ShieldCheck, Upload, Phone, Save } from "lucide-react";
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function ProfileEditor({ profile, submission }: Props) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);\n  const [geoRows, setGeoRows] = useState<{admin_level_1:string|null;admin_level_2:string|null;admin_level_3:string|null}[]>([]);
   const router = useRouter();
   const [name, setName] = useState(profile.display_name || "");
   const [country, setCountry] = useState(profile.country_code || "RW");
@@ -29,7 +29,7 @@ export function ProfileEditor({ profile, submission }: Props) {
   const [district, setDistrict] = useState(profile.district || "");
   const [sector, setSector] = useState(profile.sector || "");
   const [cell, setCell] = useState(profile.cell || "");
-  const [village, setVillage] = useState(profile.village || "");
+  const [village, setVillage] = useState(profile.village || "");\n  const provinces = Array.from(new Set(geoRows.map(row => row.admin_level_1).filter((value): value is string => !!value))).sort();\n  const districts = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province).map(row => row.admin_level_2).filter((value): value is string => !!value))).sort();\n  const sectors = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province && row.admin_level_2 === district).map(row => row.admin_level_3).filter((value): value is string => !!value))).sort();
   const [region, setRegion] = useState(profile.region || "");
   const [city, setCity] = useState(profile.city || "");
   const [phone, setPhone] = useState(profile.phone_e164 || "");
@@ -38,7 +38,7 @@ export function ProfileEditor({ profile, submission }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState("");\n\n  useEffect(() => {\n    let active = true;\n    async function loadRwandaGeography() {\n      const { data, error: geographyError } = await supabase.from("geography").select("admin_level_1,admin_level_2,admin_level_3").eq("country_code", "RW").not("admin_level_1", "is", null).limit(1000);\n      if (active && !geographyError) setGeoRows(data || []);\n    }\n    void loadRwandaGeography();\n    return () => { active = false; };\n  }, [supabase]);
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault(); setBusy("profile"); setMessage(""); setError("");
@@ -113,9 +113,13 @@ export function ProfileEditor({ profile, submission }: Props) {
       {country.toUpperCase() === "RW" ? <div className="rounded-xl border border-slate-100 p-4">
         <h3 className="font-bold text-slate-800">Rwanda location</h3>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {[[province,setProvince,"Province"],[district,setDistrict,"District"],[sector,setSector,"Sector"],[cell,setCell,"Cell"],[village,setVillage,"Village"]].map(([value,setter,label]: any)=><label key={label} className="block text-sm font-semibold">{label}<input value={value} onChange={e=>setter(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>)}
+          <label className="block text-sm font-semibold">Province<select value={province} onChange={e=>{setProvince(e.target.value);setDistrict("");setSector("");setCell("");setVillage("");}} className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3"><option value="">Select province</option>{provinces.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="block text-sm font-semibold">District<select value={district} onChange={e=>{setDistrict(e.target.value);setSector("");setCell("");setVillage("");}} disabled={!province} className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3 disabled:opacity-50"><option value="">Select district</option>{districts.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="block text-sm font-semibold">Sector<select value={sector} onChange={e=>{setSector(e.target.value);setCell("");setVillage("");}} disabled={!district} className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3 disabled:opacity-50"><option value="">Select sector</option>{sectors.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="block text-sm font-semibold">Cell<input value={cell} onChange={e=>setCell(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Enter cell"/></label>
+          <label className="block text-sm font-semibold">Village<input value={village} onChange={e=>setVillage(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Enter village"/></label>
         </div>
-        <p className="mt-2 text-xs text-slate-400">Use the official administrative spelling for accurate survey matching.</p>
+        <p className="mt-2 text-xs text-slate-400">Province, district and sector choices use the CC-BY-4.0 Rwanda administrative reference. Cell and village names remain editable until the 2022 detailed reference is loaded.</p>
       </div> : <div className="grid gap-3 sm:grid-cols-2">
         <label className="block text-sm font-semibold">Region / state<input value={region} onChange={e=>setRegion(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
         <label className="block text-sm font-semibold">City<input value={city} onChange={e=>setCity(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
