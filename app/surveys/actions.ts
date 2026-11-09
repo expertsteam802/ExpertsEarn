@@ -1,12 +1,26 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { createHmac } from "node:crypto";
 import { redirect } from "next/navigation";
 
 export async function startSurvey(surveyId: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data, error } = await supabase.rpc("start_survey_response", { p_survey_id: surveyId });
+
+  const requestHeaders = headers();
+  const forwardedFor = requestHeaders.get("x-forwarded-for");
+  const ipAddress = forwardedFor?.split(",")[0]?.trim() || requestHeaders.get("x-real-ip") || "";
+  const hashSecret = process.env.IP_HASH_SECRET;
+  const ipHash = ipAddress && hashSecret
+    ? createHmac("sha256", hashSecret).update(ipAddress).digest("hex")
+    : null;
+
+  const { data, error } = await supabase.rpc("start_survey_response", {
+    p_survey_id: surveyId,
+    p_ip_hash: ipHash
+  });
   if (error) throw new Error(error.message);
   redirect(`/surveys/${surveyId}/take/${data}`);
 }

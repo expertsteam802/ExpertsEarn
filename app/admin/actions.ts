@@ -16,3 +16,19 @@ export async function approvePartner(formData:FormData){
  if(error)redirect("/admin?error="+encodeURIComponent(error.message));
  redirect("/admin?partner_approved=1");
 }
+
+export async function setSurveyStatus(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const surveyId = String(formData.get("survey_id") || "");
+  const status = String(formData.get("status") || "");
+  const allowed = ["draft", "active", "paused", "completed", "archived"];
+  if (!surveyId || !allowed.includes(status)) redirect("/admin?error=invalid_survey_status");
+  const { error } = await supabase.rpc("admin_set_survey_status", {
+    p_survey_id: surveyId,
+    p_status: status
+  });
+  if (error) redirect("/admin?error=" + encodeURIComponent(error.message));
+  redirect("/admin?survey_updated=1");
+}

@@ -1,3 +1,3 @@
 prompt,prompt_rw,prompt_fr,question_type,options,difficulty,language,category_slug
-"What is your preferred way to shop?","","","single_choice","[""Online"",""In-store"",""Both""]",1,en,shopping
+"What is your preferred way to shop?","","","single_choice","[""Online"",""In-store"",""Both""]",1,en,consumer-goods
 "How often do you use mobile money?","","","single_choice","[""Daily"",""Weekly"",""Monthly"",""Never""]",1,en,finance
