@@ -41,7 +41,7 @@ export default async function QuestionBankPage({ searchParams }: { searchParams:
         <label className="text-sm font-semibold sm:col-span-2">Survey title<input name="title" required minLength={3} placeholder="Community pulse survey" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
         <label className="text-sm font-semibold">Language<select name="language" className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3"><option value="en">English</option><option value="rw">Kinyarwanda</option><option value="fr">French</option></select></label>
         <label className="text-sm font-semibold">Questions<input name="question_count" type="number" min="1" max="100" defaultValue="20" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
-        <label className="text-sm font-semibold">Reward (RWF)<input name="reward_rwf" type="number" min="0" defaultValue="0" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+        <label className="text-sm font-semibold">Reward (RWF)<input name="reward_rwf" type="number" min="0" max="1000000" required placeholder="Enter reward" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
         <button className="self-end rounded-xl bg-forest px-5 py-3 font-bold text-white">Generate draft survey</button>
       </form>
     </section>
