@@ -9,3 +9,10 @@ export async function updatePayout(formData:FormData){
  if(error)redirect("/admin?error="+encodeURIComponent(error.message));
  redirect("/admin?updated=1");
 }
+export async function approvePartner(formData:FormData){
+ const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const id=String(formData.get("partner_id")||"");
+ const {error}=await supabase.from("partner_accounts").update({is_approved:true}).eq("id",id);
+ if(error)redirect("/admin?error="+encodeURIComponent(error.message));
+ redirect("/admin?partner_approved=1");
+}
