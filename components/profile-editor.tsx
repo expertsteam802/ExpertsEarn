@@ -114,6 +114,19 @@ export function ProfileEditor({ profile, submission }: Props) {
   }
 
   return <div className="mt-7 space-y-6">
+    <section className="surface p-6">
+      <form onSubmit={uploadAvatar} className="flex flex-wrap items-center gap-4">
+        <div className="h-20 w-20 overflow-hidden rounded-full border border-[#c6a873]/40 bg-[#171821]">
+          {avatarUrl ? <img src={avatarUrl} alt="Profile picture" className="h-full w-full object-cover"/> : <div className="grid h-full w-full place-items-center text-2xl font-bold text-[#c6a873]">{name.trim().charAt(0).toUpperCase() || "E"}</div>}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-bold text-[#f2ecdf]">Profile picture</h2>
+          <p className="mt-1 text-xs text-[#aaa6a2]">JPG, PNG or WebP · maximum 5 MB</p>
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setAvatarFile(e.target.files?.[0]||null)} className="mt-2 block w-full text-xs"/>
+          <button disabled={busy!==""||!avatarFile} className="mt-3 rounded-xl bg-forest px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{busy==="avatar"?"Uploading…":"Upload picture"}</button>
+        </div>
+      </form>
+    </section>
     <form onSubmit={saveProfile} className="surface space-y-4 p-6">
       <h2 className="text-lg font-black text-slate-950">Personal details</h2>
       <label className="block text-sm font-semibold">Full name<input required minLength={2} value={name} onChange={e=>setName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
