@@ -53,14 +53,14 @@ export async function updatePlatformSetting(formData: FormData) {
   const key = String(formData.get("key") || "");
   const raw = String(formData.get("value") || "");
   const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding"];
-  if (!allowed.includes(key)) redirect("/admin?tab=settings&error=setting_not_allowed");
+  if (!allowed.includes(key)) return {ok:false,error:"This setting is not allowed."};
   let value: unknown;
-  try { value = JSON.parse(raw); } catch { redirect("/admin?tab=settings&error=setting_must_be_valid_json"); }
-  if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) redirect("/admin?tab=settings&error=daily_cap_must_be_1_to_500");
-  if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) redirect("/admin?tab=settings&error=minimum_payout_out_of_range");
+  try { value = JSON.parse(raw); } catch { return {ok:false,error:"Enter valid JSON before saving."}; }
+  if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) return {ok:false,error:"Daily survey cap must be between 1 and 500."};
+  if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) return {ok:false,error:"Minimum payout must be between 1,000 and 10,000,000 RWF."};
   const { error } = await supabase.from("platform_settings").update({ value: value as any, updated_at: new Date().toISOString() }).eq("key", key);
-  if (error) redirect("/admin?tab=settings&error=" + encodeURIComponent(error.message));
-  redirect("/admin?tab=settings&settings_saved=1&setting=" + encodeURIComponent(key));
+  if (error) return {ok:false,error:error.message};
+  return {ok:true,message:"Setting saved."};
 }
 
 
