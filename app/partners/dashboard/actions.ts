@@ -30,6 +30,7 @@ export async function createPartnerSurvey(formData:FormData){
  const responseLimit=Number(formData.get("response_limit")||100);
  const price=Number(formData.get("partner_price_usd")||0.2);
  const country=String(formData.get("target_country")||"").trim().toUpperCase();
+ const targetGender=String(formData.get("target_gender")||"").trim()||null;
  const region=String(formData.get("target_region")||"").trim();
  const city=String(formData.get("target_city")||"").trim();
  const geo=(name:string)=>String(formData.get(name)||"").trim()||null;
