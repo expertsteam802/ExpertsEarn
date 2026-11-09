@@ -10,7 +10,7 @@ export default async function DashboardPage(){
   supabase.from("survey_responses").select("survey_id,status").eq("respondent_id",user.id)
  ]);
  const completed=new Set((responses||[]).filter(r=>r.status==="submitted").map(r=>r.survey_id));
- const age=profile?.date_of_birth ? Math.floor((Date.now()-new Date(profile.date_of_birth).getTime())/31557600000) : null;
+ const age=profile?.date_of_birth ? (()=>{const today=new Date();const birth=new Date(profile.date_of_birth);let years=today.getFullYear()-birth.getFullYear();if(today.getMonth()<birth.getMonth()||(today.getMonth()===birth.getMonth()&&today.getDate()<birth.getDate()))years--;return years;})() : null;
  const eligible=(allSurveys||[]).filter(s=>{
   if(completed.has(s.id)||(s.response_limit!==null&&s.response_count>=s.response_limit)) return false;
   const now=Date.now();
