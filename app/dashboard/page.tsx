@@ -4,7 +4,7 @@ import {DashboardShell} from "@/components/dashboard-shell";
 export default async function DashboardPage(){
  const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const [{data:profile},{data:wallet},{data:allSurveys},{data:responses}]=await Promise.all([
-  supabase.from("profiles").select("display_name,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth").eq("id",user.id).maybeSingle(),
+  supabase.from("profiles").select("display_name,avatar_url,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth").eq("id",user.id).maybeSingle(),
   supabase.from("wallets").select("balance_rwf,lifetime_earned_rwf").eq("user_id",user.id).maybeSingle(),
   supabase.from("surveys").select("id,title,description,reward_rwf,question_count,language,response_count,response_limit,starts_at,ends_at,target_country,target_region,target_city,target_province,target_district,target_sector,target_cell,target_village,target_gender,min_age,max_age").eq("status","active").order("created_at",{ascending:false}).limit(200),
   supabase.from("survey_responses").select("survey_id,status").eq("respondent_id",user.id)
@@ -28,5 +28,5 @@ export default async function DashboardPage(){
   if(s.max_age!==null&&age!>s.max_age) return false;
   return true;
  }).map(s=>({...s,question_count:s.question_count||0}));
- return <DashboardShell name={profile?.display_name||""} email={user.email||""} role={profile?.role||"respondent"} balance={wallet?.balance_rwf??0} lifetime={wallet?.lifetime_earned_rwf??0} surveys={eligible as any}/>;
+ return <DashboardShell name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balance={wallet?.balance_rwf??0} lifetime={wallet?.lifetime_earned_rwf??0} surveys={eligible as any}/>;
 }
