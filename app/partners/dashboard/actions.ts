@@ -48,7 +48,7 @@ export async function createPartnerSurvey(formData:FormData){
   if((type==="single_choice"||type==="multiple_choice")&&(options.length<2||options.length>30||!options.every((option:any)=>typeof option==="string"||(option&&typeof option.label==="string"&&typeof option.value==="string"))))return false;
   return true;
  });
- if(title.length<3||title.length>140||description.length>5000||!["en","rw","fr"].includes(language)||!Number.isSafeInteger(reward)||reward<0||reward>100000||!Number.isInteger(responseLimit)||responseLimit<1||responseLimit>100000||!Number.isFinite(price)||price<0.2||price>0.5||!validQuestions||(minAge!==null&&(!Number.isInteger(minAge)||minAge<13||minAge>100))||(maxAge!==null&&(!Number.isInteger(maxAge)||maxAge<13||maxAge>100))||(minAge!==null&&maxAge!==null&&minAge>maxAge)){
+ if(title.length<3||title.length>140||description.length>5000||!["en","rw","fr"].includes(language)||!Number.isSafeInteger(reward)||reward<0||reward>100000||!Number.isInteger(responseLimit)||responseLimit<1||responseLimit>100000||!Number.isFinite(price)||price<0.2||price>0.5||!validQuestions||(targetGender!==null&&!["female","male","non_binary","prefer_not_to_say"].includes(targetGender))||(minAge!==null&&(!Number.isInteger(minAge)||minAge<13||minAge>100))||(maxAge!==null&&(!Number.isInteger(maxAge)||maxAge<13||maxAge>100))||(minAge!==null&&maxAge!==null&&minAge>maxAge)){
   redirect("/partners/dashboard?error=invalid_survey_details");
  }
  const normalized=questions.map((q:any)=>({prompt:q.prompt.trim(),type:q.type||"text",options:Array.isArray(q.options)?q.options:[],required:q.required!==false}));
@@ -56,7 +56,7 @@ export async function createPartnerSurvey(formData:FormData){
   owner_id:user.id,partner_id:user.id,title,description:description||null,status:"draft",language,
   target_country:country||null,target_region:region||null,target_city:city||null,
   target_province:geo("target_province"),target_district:geo("target_district"),target_sector:geo("target_sector"),
-  target_cell:geo("target_cell"),target_village:geo("target_village"),
+  target_cell:geo("target_cell"),target_village:geo("target_village"),target_gender:targetGender,
   min_age:minAge,max_age:maxAge,response_limit:responseLimit,reward_rwf:reward,partner_price_usd:price,
   question_count:normalized.length,is_random_session:false
  }).select("id").single();
