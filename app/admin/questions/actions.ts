@@ -78,9 +78,10 @@ export async function generateStarterSurveys(formData: FormData) {
   if (!user) redirect("/login");
   const surveyCount = Number(formData.get("survey_count") || 100);
   const questionCount = Number(formData.get("question_count") || 20);
-  if (!Number.isInteger(surveyCount) || !Number.isInteger(questionCount)) redirect("/admin/questions?error=invalid_starter_batch");
+  const reward = Number(formData.get("reward_rwf") || 0);
+  if (!Number.isInteger(surveyCount) || !Number.isInteger(questionCount) || !Number.isSafeInteger(reward) || reward < 0 || reward > 1000000) redirect("/admin/questions?error=invalid_starter_batch");
   const { data, error } = await supabase.rpc("admin_generate_starter_survey_set", {
-    p_survey_count: surveyCount, p_questions_per_survey: questionCount
+    p_survey_count: surveyCount, p_questions_per_survey: questionCount, p_reward_rwf: reward
   });
   if (error) redirect("/admin/questions?error=" + encodeURIComponent(error.message));
   redirect("/admin/questions?starter_generated=" + encodeURIComponent(String(data)));
