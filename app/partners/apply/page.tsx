@@ -1,0 +1,9 @@
+import Link from "next/link";
+import {redirect} from "next/navigation";
+import {createClient} from "@/lib/supabase/server";
+import {applyAsPartner} from "./actions";
+export default async function PartnerApply({searchParams}:{searchParams:{error?:string}}){
+ const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const {data:existing}=await supabase.from("partner_accounts").select("id").eq("user_id",user.id).maybeSingle();if(existing)redirect("/partners/dashboard");
+ return <main className="grid min-h-screen place-items-center px-5 py-10"><div className="surface w-full max-w-xl p-8"><Link href="/partners" className="text-sm font-bold text-forest">← For businesses</Link><h1 className="mt-5 text-2xl font-black text-slate-950">Apply for a partner account</h1><p className="mt-2 text-sm leading-6 text-slate-500">Tell us about your organization. The ExpertsEarn team will review your application before survey publishing and API access are enabled.</p>{searchParams.error&&<p className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Please check your company name and try again.</p>}<form action={applyAsPartner} className="mt-6 space-y-4"><label className="block text-sm font-semibold">Organization name<input name="company_name" required minLength={2} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label><label className="block text-sm font-semibold">Website (optional)<input name="website" type="url" className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="https://example.com"/></label><label className="block text-sm font-semibold">Billing email<input name="billing_email" type="email" defaultValue={user.email||""} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label><button className="w-full rounded-xl bg-forest px-5 py-3.5 font-bold text-white">Submit application</button></form></div></main>;
+}
