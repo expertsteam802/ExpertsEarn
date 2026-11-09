@@ -18,22 +18,13 @@ export async function approvePartner(formData:FormData){
 }
 
 export async function setSurveyStatus(formData: FormData) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  const surveyId = String(formData.get("survey_id") || "");
-  const status = String(formData.get("status") || "");
-  const allowed = ["draft", "active", "paused", "completed", "archived"];
-  if (!surveyId || !allowed.includes(status)) redirect("/admin?tab=surveys&error=invalid_survey_status");
-  const { error } = await supabase.rpc("admin_set_survey_status", {
-    p_survey_id: surveyId,
-    p_status: status
-  });
-  if (error) redirect("/admin?tab=surveys&error=" + encodeURIComponent(error.message));
-  redirect("/admin?tab=surveys&survey_updated=1");
+  const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser();
+  if(!user) return {ok:false,error:"Please sign in again."};
+  const surveyId=String(formData.get("survey_id")||""); const status=String(formData.get("status")||"");
+  if(!surveyId||!["draft","active","paused","completed","archived"].includes(status)) return {ok:false,error:"Invalid survey status."};
+  const {error}=await supabase.rpc("admin_set_survey_status",{p_survey_id:surveyId,p_status:status});
+  return error?{ok:false,error:error.message}:{ok:true,message:"Survey status updated."};
 }
-
-
 export async function updateUserRole(formData: FormData) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -65,34 +56,19 @@ export async function updatePlatformSetting(formData: FormData) {
 
 
 export async function updateSurveyTerms(formData: FormData) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  const surveyId = String(formData.get("survey_id") || "");
-  const reward = Number(formData.get("reward_rwf"));
-  const limitRaw = String(formData.get("response_limit") || "").trim();
-  const limit = limitRaw ? Number(limitRaw) : null;
-  if (!surveyId || !Number.isInteger(reward) || (limit !== null && !Number.isInteger(limit))) redirect("/admin?tab=surveys&error=invalid_survey_terms");
-  const { error } = await supabase.rpc("admin_update_survey_terms", {
-    p_survey_id: surveyId, p_reward_rwf: reward, p_response_limit: limit
-  });
-  if (error) redirect("/admin?tab=surveys&error=" + encodeURIComponent(error.message));
-  redirect("/admin?tab=surveys&survey_updated=1");
+  const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser();
+  if(!user) return {ok:false,error:"Please sign in again."};
+  const surveyId=String(formData.get("survey_id")||""); const reward=Number(formData.get("reward_rwf"));
+  const limitRaw=String(formData.get("response_limit")||"").trim(); const limit=limitRaw?Number(limitRaw):null;
+  if(!surveyId||!Number.isInteger(reward)||(limit!==null&&!Number.isInteger(limit))) return {ok:false,error:"Enter a valid reward and response cap."};
+  const {error}=await supabase.rpc("admin_update_survey_terms",{p_survey_id:surveyId,p_reward_rwf:reward,p_response_limit:limit});
+  return error?{ok:false,error:error.message}:{ok:true,message:"Survey terms saved."};
 }
-
-
 export async function bulkUpdateSurveyStatus(formData: FormData) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  const ids = formData.getAll("survey_ids").map(String).filter(Boolean);
-  const status = String(formData.get("status") || "");
-  if (!ids.length || ids.length > 50 || !["active", "paused", "archived"].includes(status)) {
-    redirect("/admin?tab=surveys&error=select_valid_surveys");
-  }
-  for (const surveyId of ids) {
-    const { error } = await supabase.rpc("admin_set_survey_status", { p_survey_id: surveyId, p_status: status });
-    if (error) redirect("/admin?tab=surveys&error=" + encodeURIComponent(error.message));
-  }
-  redirect("/admin?tab=surveys&survey_updated=1");
+  const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser();
+  if(!user) return {ok:false,error:"Please sign in again."};
+  const ids=formData.getAll("survey_ids").map(String).filter(Boolean); const status=String(formData.get("status")||"");
+  if(!ids.length||ids.length>50||!["active","paused","archived"].includes(status)) return {ok:false,error:"Select between 1 and 50 surveys and choose a valid action."};
+  for(const surveyId of ids){const {error}=await supabase.rpc("admin_set_survey_status",{p_survey_id:surveyId,p_status:status});if(error)return {ok:false,error:error.message};}
+  return {ok:true,message:ids.length+" surveys updated."};
 }
