@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {redirect} from "next/navigation";
 import {createClient} from "@/lib/supabase/server";
-import {updatePayout,approvePartner,setSurveyStatus,updateUserRole,updatePlatformSetting,updateSurveyTerms} from "@/app/admin/actions";
+import {updatePayout,approvePartner,setSurveyStatus,updateUserRole,updatePlatformSetting,updateSurveyTerms,bulkUpdateSurveyStatus} from "@/app/admin/actions";
 import {Brand} from "@/components/brand";
 const nav=[["overview","Overview"],["users","Users"],["money","Money"],["partners","Partners"],["surveys","Surveys"],["payouts","Payouts"],["settings","Settings"]];
 export default async function AdminPage({searchParams}:{searchParams:{error?:string;updated?:string;partner_approved?:string;survey_updated?:string;user_updated?:string;settings_saved?:string;tab?:string}}){
