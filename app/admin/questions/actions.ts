@@ -70,3 +70,18 @@ export async function createRandomSurvey(formData: FormData) {
   if (error) redirect("/admin/questions?error=" + encodeURIComponent(error.message));
   redirect("/admin/questions?created=" + encodeURIComponent(String(data)));
 }
+
+
+export async function generateStarterSurveys(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const surveyCount = Number(formData.get("survey_count") || 100);
+  const questionCount = Number(formData.get("question_count") || 20);
+  if (!Number.isInteger(surveyCount) || !Number.isInteger(questionCount)) redirect("/admin/questions?error=invalid_starter_batch");
+  const { data, error } = await supabase.rpc("admin_generate_starter_survey_set", {
+    p_survey_count: surveyCount, p_questions_per_survey: questionCount
+  });
+  if (error) redirect("/admin/questions?error=" + encodeURIComponent(error.message));
+  redirect("/admin/questions?starter_generated=" + encodeURIComponent(String(data)));
+}
