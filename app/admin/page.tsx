@@ -9,7 +9,8 @@ export default async function AdminPage({searchParams}:{searchParams:{error?:str
   supabase.from("profiles").select("*",{count:"exact",head:true}),
   supabase.from("surveys").select("*",{count:"exact",head:true}),
   supabase.from("payout_requests").select("id,user_id,amount_rwf,method,destination,status,requested_at").order("requested_at",{ascending:false}).limit(50),
-  supabase.from("partner_accounts").select("id,company_name,website,billing_email,is_approved,created_at").order("created_at",{ascending:false}).limit(50)
+  supabase.from("partner_accounts").select("id,company_name,website,billing_email,is_approved,created_at").order("created_at",{ascending:false}).limit(50),
+  supabase.from("surveys").select("id,title,status,response_count,response_limit,partner_id,created_at").order("created_at",{ascending:false}).limit(50)
  ]);
  return <main className="min-h-screen py-9"><div className="container"><div className="flex items-center justify-between"><div><p className="text-sm font-bold text-amber-600">PLATFORM CONTROL</p><h1 className="mt-1 text-3xl font-black text-slate-950">ExpertsEarn Admin</h1></div><div className="flex flex-wrap items-center gap-2"><Link href="/admin/questions" className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-forest">Question bank</Link><Link href="/admin/identity" className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-forest">Identity reviews</Link><Link href="/dashboard" className="text-sm font-bold text-forest">← Dashboard</Link></div></div>
  <div className="mt-7 grid gap-4 sm:grid-cols-3">{[["Registered users",users??0],["Surveys",surveys??0],["Payout requests",payouts?.length??0]].map(([label,value])=><div key={label} className="surface p-5"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-black text-slate-950">{value}</p></div>)}</div>
