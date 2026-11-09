@@ -31,6 +31,6 @@ export async function completeSurvey(responseId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data, error } = await supabase.rpc("complete_survey_response", { p_response_id: responseId });
-  if (error) redirect(`/surveys?error=${encodeURIComponent(error.message)}`);
+  if (error) throw new Error(error.message);
   redirect(`/complete?reward=${encodeURIComponent(String(data?.reward_rwf ?? 0))}`);
 }
