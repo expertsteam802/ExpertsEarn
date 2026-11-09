@@ -2,9 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { QuestionBankImporter } from "@/components/question-bank-importer";
-import { createRandomSurvey } from "./actions";
+import { createRandomSurvey, generateStarterSurveys } from "./actions";
 
-export default async function QuestionBankPage({ searchParams }: { searchParams: { error?: string; created?: string } }) {
+export default async function QuestionBankPage({ searchParams }: { searchParams: { error?: string; created?: string; starter_generated?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -22,6 +22,16 @@ export default async function QuestionBankPage({ searchParams }: { searchParams:
     <div className="surface mt-5 flex flex-wrap items-center justify-between gap-4 p-5"><div><p className="text-sm text-slate-500">Questions currently stored</p><p className="mt-1 text-3xl font-black text-forest">{(count ?? 0).toLocaleString()}</p></div><div className="text-right"><p className="text-sm font-bold text-slate-800">Target: 10,000+</p><p className="mt-1 text-xs text-slate-500">English · Kinyarwanda · French</p></div></div>
     {searchParams.error && <p className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{decodeURIComponent(searchParams.error)}</p>}
     {searchParams.created && <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">Random survey created as a draft: {searchParams.created}</p>}
+    {searchParams.starter_generated && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{searchParams.starter_generated} starter surveys were generated as drafts. Review and publish them from Creator Studio.</p>}
+    <section className="surface mt-6 p-6">
+      <h2 className="text-lg font-black text-slate-950">Generate 100 starter surveys</h2>
+      <p className="mt-2 text-sm text-slate-500">Creates draft surveys across all eight research categories, each with 20 questions. All 100 remain unpublished until you review and activate them.</p>
+      <form action={generateStarterSurveys} className="mt-4 flex flex-wrap items-end gap-3">
+        <label className="text-sm font-semibold">Survey count<input name="survey_count" type="number" min="1" max="100" defaultValue="100" className="mt-2 block w-28 rounded-xl border border-slate-200 p-3"/></label>
+        <label className="text-sm font-semibold">Questions per survey<input name="question_count" type="number" min="1" max="100" defaultValue="20" className="mt-2 block w-36 rounded-xl border border-slate-200 p-3"/></label>
+        <button className="rounded-xl bg-forest px-5 py-3 font-bold text-white">Generate starter set</button>
+      </form>
+    </section>
     <div className="mt-6"><QuestionBankImporter/></div>
     <section className="surface mt-6 p-6">
       <h2 className="text-lg font-black text-slate-950">Generate a random survey</h2>
