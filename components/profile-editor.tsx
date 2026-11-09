@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, ShieldCheck, Upload, Phone, Save } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Upload, Save } from "lucide-react";
 
 type Submission = { id: string; status: string; submitted_at: string; admin_note: string | null } | null;
 type Props = {
@@ -36,9 +36,6 @@ export function ProfileEditor({ profile, submission }: Props) {
   const sectors = Array.from(new Set(geoRows.filter(row => row.admin_level_1 === province && row.admin_level_2 === district).map(row => row.admin_level_3).filter((value): value is string => !!value))).sort();
   const [region, setRegion] = useState(profile.region || "");
   const [city, setCity] = useState(profile.city || "");
-  const [phone, setPhone] = useState(profile.phone_e164 || "");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
@@ -74,24 +71,6 @@ export function ProfileEditor({ profile, submission }: Props) {
     setBusy("");
     if (updateError) { setError(updateError.message); return; }
     setMessage("Profile saved."); router.refresh();
-  }
-
-  async function sendPhoneCode() {
-    setBusy("phone"); setMessage(""); setError("");
-    const normalized = phone.trim();
-    if (!/^\+[1-9]\d{7,14}$/.test(normalized)) { setError("Enter an international number, for example +2507XXXXXXXX."); setBusy(""); return; }
-    const { error: phoneError } = await supabase.auth.updateUser({ phone: normalized });
-    setBusy("");
-    if (phoneError) { setError(phoneError.message); return; }
-    setOtpSent(true); setMessage("Verification code sent. Enter the SMS code to confirm this number.");
-  }
-
-  async function verifyPhoneCode() {
-    setBusy("verify"); setMessage(""); setError("");
-    const { error: verifyError } = await supabase.auth.verifyOtp({ phone: phone.trim(), token: otp.trim(), type: "phone_change" });
-    setBusy("");
-    if (verifyError) { setError(verifyError.message); return; }
-    setOtpSent(false); setOtp(""); setMessage("Phone number verified."); router.refresh();
   }
 
   async function uploadIdentity(e: React.FormEvent) {
@@ -140,14 +119,6 @@ export function ProfileEditor({ profile, submission }: Props) {
       </div>}
       <button disabled={busy!==""} className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 font-bold text-white disabled:opacity-60"><Save className="h-4 w-4"/>{busy==="profile"?"Saving…":"Save profile"}</button>
     </form>
-
-    <section className="surface p-6">
-      <div className="flex items-center gap-2"><Phone className="h-5 w-5 text-forest"/><h2 className="text-lg font-black text-slate-950">Phone verification</h2></div>
-      <p className="mt-2 text-sm text-slate-500">One verified phone number per account. Use international format with country code.</p>
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row"><input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+2507XXXXXXXX" className="min-w-0 flex-1 rounded-xl border border-slate-200 p-3"/><button type="button" disabled={busy!==""} onClick={sendPhoneCode} className="rounded-xl border border-forest px-4 py-3 text-sm font-bold text-forest">{busy==="phone"?"Sending…":"Send SMS code"}</button></div>
-      {otpSent&&<div className="mt-3 flex flex-col gap-3 sm:flex-row"><input value={otp} onChange={e=>setOtp(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder="SMS verification code" className="min-w-0 flex-1 rounded-xl border border-slate-200 p-3"/><button type="button" disabled={busy!==""||!otp.trim()} onClick={verifyPhoneCode} className="rounded-xl bg-forest px-4 py-3 text-sm font-bold text-white">{busy==="verify"?"Verifying…":"Verify number"}</button></div>}
-      <p className="mt-3 text-xs text-slate-400">{profile.phone_verified_at ? "Verified phone: " + (profile.phone_e164 || "confirmed") : "SMS delivery requires a phone provider configured in Supabase Auth."}</p>
-    </section>
 
     <section className="surface p-6">
       <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-forest"/><h2 className="text-lg font-black text-slate-950">Identity verification</h2></div>
