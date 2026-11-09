@@ -8,7 +8,7 @@ export default async function SurveyDetail({ params, searchParams }: { params: {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data: survey } = await supabase.from("surveys").select("*").eq("id",params.id).eq("status","active").maybeSingle();
+  const { data: survey } = await supabase.from("surveys").select("*").eq("id",params.id).eq("status","active").gt("reward_rwf",0).maybeSingle();
   if (!survey) notFound();
   const [{ count }, { data:existing }] = await Promise.all([
     supabase.from("survey_questions").select("*",{count:"exact",head:true}).eq("survey_id",survey.id),
