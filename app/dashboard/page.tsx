@@ -10,7 +10,6 @@ export default async function DashboardPage(){
   supabase.from("survey_responses").select("survey_id,status").eq("respondent_id",user.id)
  ]);
  const completed=new Set((responses||[]).filter(r=>r.status==="submitted").map(r=>r.survey_id));
- const inProgress=new Set((responses||[]).filter(r=>r.status==="in_progress").map(r=>r.survey_id));
  const age=profile?.date_of_birth ? Math.floor((Date.now()-new Date(profile.date_of_birth).getTime())/31557600000) : null;
  const eligible=(allSurveys||[]).filter(s=>{
   if(completed.has(s.id)||(s.response_limit!==null&&s.response_count>=s.response_limit)) return false;
@@ -24,8 +23,8 @@ export default async function DashboardPage(){
   ];
   if(fields.some(([target,actual])=>target!==null&&target!==actual)) return false;
   if((s.min_age!==null||s.max_age!==null)&&age===null) return false;
-  if(s.min_age!==null&&age!<s.min_age) return false;
-  if(s.max_age!==null&&age!>s.max_age) return false;
+  if(s.min_age!==null&&age!==null&&age<s.min_age) return false;
+  if(s.max_age!==null&&age!==null&&age>s.max_age) return false;
   return true;
  }).map(s=>({...s,question_count:s.question_count||0}));
  return <DashboardShell name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balance={wallet?.balance_rwf??0} lifetime={wallet?.lifetime_earned_rwf??0} surveys={eligible as any}/>;
