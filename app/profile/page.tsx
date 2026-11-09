@@ -9,7 +9,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/login");
 
   const [{ data: profile }, { data: submissions }] = await Promise.all([
-    supabase.from("profiles").select("display_name,phone_e164,phone_verified_at,country_code,preferred_language,date_of_birth,gender,identity_verified_at").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name,phone_e164,phone_verified_at,country_code,preferred_language,date_of_birth,gender,identity_verified_at,province,district,sector,cell,village,region,city").eq("id", user.id).maybeSingle(),
     supabase.from("identity_verification_submissions").select("id,status,submitted_at,admin_note").eq("user_id", user.id).order("submitted_at", { ascending: false }).limit(1)
   ]);
 
@@ -17,7 +17,7 @@ export default async function ProfilePage() {
     <div className="container max-w-2xl">
       <Link href="/dashboard" className="text-sm font-bold text-forest">← Dashboard</Link>
       <h1 className="mt-5 text-3xl font-black text-slate-950">Your profile</h1>
-      <p className="mt-2 text-sm text-slate-500">Manage your details, verify your phone, and complete identity checks before your first payout.</p>
+      <p className="mt-2 text-sm text-slate-500">Manage your details, location, phone verification, and identity checks before your first payout.</p>
       <div className="mt-4 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">Signed in as <strong>{user.email}</strong></div>
       <ProfileEditor profile={{
         display_name: profile?.display_name ?? null,
@@ -27,7 +27,14 @@ export default async function ProfilePage() {
         preferred_language: (profile?.preferred_language ?? "en") as "en"|"rw"|"fr",
         date_of_birth: profile?.date_of_birth ?? null,
         gender: profile?.gender ?? null,
-        identity_verified_at: profile?.identity_verified_at ?? null
+        identity_verified_at: profile?.identity_verified_at ?? null,
+        province: profile?.province ?? null,
+        district: profile?.district ?? null,
+        sector: profile?.sector ?? null,
+        cell: profile?.cell ?? null,
+        village: profile?.village ?? null,
+        region: profile?.region ?? null,
+        city: profile?.city ?? null
       }} submission={submissions?.[0] ?? null}/>
     </div>
   </main>;
