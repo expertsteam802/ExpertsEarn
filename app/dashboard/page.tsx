@@ -1,12 +1,15 @@
 import {redirect} from "next/navigation";
 import {createClient} from "@/lib/supabase/server";
 import {DashboardShell} from "@/components/dashboard-shell";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export default async function DashboardPage(){
  const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const [{data:profile},{data:wallet},{data:allSurveys},{data:responses}]=await Promise.all([
   supabase.from("profiles").select("display_name,avatar_url,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth").eq("id",user.id).maybeSingle(),
   supabase.from("wallets").select("balance_rwf,lifetime_earned_rwf").eq("user_id",user.id).maybeSingle(),
-  supabase.from("surveys").select("id,title,description,reward_rwf,question_count,language,response_count,response_limit,starts_at,ends_at,target_country,target_region,target_city,target_province,target_district,target_sector,target_cell,target_village,target_gender,min_age,max_age").eq("status","active").order("created_at",{ascending:false}).limit(200),
+  supabase.from("surveys").select("id,title,description,reward_rwf,question_count,language,response_count,response_limit,starts_at,ends_at,target_country,target_region,target_city,target_province,target_district,target_sector,target_cell,target_village,target_gender,min_age,max_age").eq("status","active").gt("reward_rwf",0).order("created_at",{ascending:false}).limit(200),
   supabase.from("survey_responses").select("survey_id,status").eq("respondent_id",user.id)
  ]);
  const completed=new Set((responses||[]).filter(r=>r.status==="submitted").map(r=>r.survey_id));
