@@ -6,14 +6,14 @@ export async function updatePayout(formData:FormData){
  const id=String(formData.get("payout_id")||"");const status=String(formData.get("status")||"");
  const note=String(formData.get("note")||"");
  const {error}=await supabase.rpc("admin_update_payout",{p_payout_id:id,p_status:status,p_note:note});
- if(error)redirect("/admin?error="+encodeURIComponent(error.message));
+ if(error)redirect("/admin?tab=payouts&error="+encodeURIComponent(error.message));
  redirect("/admin?tab=payouts&updated=1");
 }
 export async function approvePartner(formData:FormData){
  const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const id=String(formData.get("partner_id")||"");
  const {error}=await supabase.from("partner_accounts").update({is_approved:true}).eq("id",id);
- if(error)redirect("/admin?error="+encodeURIComponent(error.message));
+ if(error)redirect("/admin?tab=partners&error="+encodeURIComponent(error.message));
  redirect("/admin?tab=partners&partner_approved=1");
 }
 
@@ -24,7 +24,7 @@ export async function setSurveyStatus(formData: FormData) {
   const surveyId = String(formData.get("survey_id") || "");
   const status = String(formData.get("status") || "");
   const allowed = ["draft", "active", "paused", "completed", "archived"];
-  if (!surveyId || !allowed.includes(status)) redirect("/admin?error=invalid_survey_status");
+  if (!surveyId || !allowed.includes(status)) redirect("/admin?tab=surveys&error=invalid_survey_status");
   const { error } = await supabase.rpc("admin_set_survey_status", {
     p_survey_id: surveyId,
     p_status: status
@@ -42,7 +42,7 @@ export async function updateUserRole(formData: FormData) {
   const role = String(formData.get("role") || "");
   if (!userId || !["respondent", "partner", "admin"].includes(role)) redirect("/admin?tab=users&error=invalid_user_role");
   const { error } = await supabase.rpc("admin_update_profile_role", { p_user_id: userId, p_role: role });
-  if (error) redirect("/admin?tab=surveys&error=" + encodeURIComponent(error.message));
+  if (error) redirect("/admin?tab=users&error=" + encodeURIComponent(error.message));
   redirect("/admin?tab=users&user_updated=1");
 }
 
@@ -77,7 +77,7 @@ export async function updateSurveyTerms(formData: FormData) {
     p_survey_id: surveyId, p_reward_rwf: reward, p_response_limit: limit
   });
   if (error) redirect("/admin?tab=surveys&error=" + encodeURIComponent(error.message));
-  redirect("/admin?survey_updated=1#surveys");
+  redirect("/admin?tab=surveys&survey_updated=1");
 }
 
 
