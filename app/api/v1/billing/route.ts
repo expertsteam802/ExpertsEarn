@@ -7,7 +7,9 @@ export async function GET(request: NextRequest) {
   const auth = await authenticatePartner(request);
   if ("error" in auth) return auth.error;
 
-  const limit = Math.min(500, Math.max(1, Number(request.nextUrl.searchParams.get("limit") || 100)));
+  const rawLimit = request.nextUrl.searchParams.get("limit");
+  const parsedLimit = rawLimit === null ? 100 : Number(rawLimit);
+  const limit = Number.isSafeInteger(parsedLimit) ? Math.min(500, Math.max(1, parsedLimit)) : 100;
   const { data, error } = await auth.admin.from("partner_billing")
     .select("id,survey_id,event_type,amount_usd,currency,description,created_at")
     .eq("partner_id", auth.partnerAccountId)
