@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Wallet as WalletIcon, ArrowLeft } from "lucide-react";
 
 export default async function WalletPage({ searchParams }: { searchParams: { payout?: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const [{ data: wallet }, { data: tx }] = await Promise.all([
