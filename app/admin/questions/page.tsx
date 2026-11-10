@@ -5,7 +5,7 @@ import { QuestionBankImporter } from "@/components/question-bank-importer";
 import { createRandomSurvey, generateStarterSurveys } from "./actions";
 
 export default async function QuestionBankPage({ searchParams }: { searchParams: { error?: string; created?: string; starter_generated?: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
