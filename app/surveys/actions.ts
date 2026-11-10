@@ -5,11 +5,11 @@ import { createHmac } from "node:crypto";
 import { redirect } from "next/navigation";
 
 export async function startSurvey(surveyId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const requestHeaders = headers();
+  const requestHeaders = await headers();
   const forwardedFor = requestHeaders.get("x-forwarded-for");
   const ipAddress = forwardedFor?.split(",")[0]?.trim() || requestHeaders.get("x-real-ip") || "";
   const hashSecret = process.env.IP_HASH_SECRET;
@@ -27,7 +27,7 @@ export async function startSurvey(surveyId: string) {
 }
 
 export async function completeSurvey(responseId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data, error } = await supabase.rpc("complete_survey_response", { p_response_id: responseId });
