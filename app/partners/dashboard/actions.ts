@@ -28,7 +28,10 @@ export async function createPartnerSurvey(formData:FormData){
  const language=String(formData.get("language")||"en");
  const reward=Number(formData.get("reward_rwf")||0);
  const responseLimit=Number(formData.get("response_limit")||100);
- const price=Number(formData.get("partner_price_usd")||0.2);\n const {data:pricingSetting}=await admin.from("platform_settings").select("value").eq("key","survey_pricing_usd").maybeSingle();\n const minPrice=Number(pricingSetting?.value?.min??0.2);\n const maxPrice=Number(pricingSetting?.value?.max??0.5);
+ const price=Number(formData.get("partner_price_usd")||0.2);
+ const {data:pricingSetting}=await admin.from("platform_settings").select("value").eq("key","survey_pricing_usd").maybeSingle();
+ const minPrice=Number(pricingSetting?.value?.min??0.2);
+ const maxPrice=Number(pricingSetting?.value?.max??0.5);
  const country=String(formData.get("target_country")||"").trim().toUpperCase();
  const targetGender=String(formData.get("target_gender")||"").trim()||null;
  const region=String(formData.get("target_region")||"").trim();
