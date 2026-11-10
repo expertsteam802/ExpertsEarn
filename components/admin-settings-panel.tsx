@@ -1,5 +1,5 @@
 "use client";
-import {useMemo,useState} from "react";
+import {useState} from "react";
 import {updatePlatformSetting} from "@/app/admin/actions";
 
 type Setting={key:string;value:any;updated_at:string};
