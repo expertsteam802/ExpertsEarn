@@ -8,7 +8,7 @@ const starter = [
   { prompt: "What would you improve?", type: "text", options: [], required: false }
 ];
 
-export function PartnerSurveyBuilder() {
+export function PartnerSurveyBuilder({minPrice=0.2,maxPrice=0.5}:{minPrice?:number;maxPrice?:number}) {
   const [questions, setQuestions] = useState(JSON.stringify(starter, null, 2));
   return <section className="surface mt-7 p-5 sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -21,7 +21,7 @@ export function PartnerSurveyBuilder() {
       <label className="text-sm font-semibold">Language<select name="language" className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3"><option value="en">English</option><option value="rw">Kinyarwanda</option><option value="fr">French</option></select></label>
       <label className="text-sm font-semibold">Reward per respondent (RWF)<input name="reward_rwf" type="number" min="0" max="100000" defaultValue="0" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Target completed responses<input name="response_limit" type="number" min="1" max="100000" defaultValue="100" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
-      <label className="text-sm font-semibold">Price per completed response (USD)<input name="partner_price_usd" type="number" min="0.01" step="0.01" defaultValue="0.20" placeholder="Within admin price range" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
+      <label className="text-sm font-semibold">Price per completed response (USD)<input name="partner_price_usd" type="number" min="0.01" step="0.01" defaultValue={minPrice.toFixed(2)} min={minPrice} max={maxPrice} placeholder={`Allowed: ${minPrice.toFixed(2)}–${maxPrice.toFixed(2)}`} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Target country code<input name="target_country" maxLength={2} placeholder="RW" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Target region / province<input name="target_region" maxLength={120} placeholder="Kigali City" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Target city / district<input name="target_city" maxLength={120} placeholder="Gasabo" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
