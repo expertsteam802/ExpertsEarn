@@ -1,7 +1,7 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-async function requireAdmin(supabase: ReturnType<typeof createClient>, userId: string) {
+async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: profile, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
   if (error || profile?.role !== "admin") redirect("/dashboard?error=admin_required");
 }
