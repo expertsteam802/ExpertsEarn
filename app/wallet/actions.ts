@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 export async function requestPayout(formData: FormData) {
- const supabase=createClient();
+ const supabase=await createClient();
  const {data:{user}}=await supabase.auth.getUser();
  if(!user) redirect("/login");
  const amount=Number(formData.get("amount"));
