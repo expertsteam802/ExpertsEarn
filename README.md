@@ -3,7 +3,8 @@
 **Answer. Earn. Repeat.** A two-sided survey marketplace by ExpertsTeam.
 
 ## Stack
-- Next.js 14 App Router + TypeScript
+- Next.js 15 App Router + TypeScript
+- React 19 + TypeScript
 - Tailwind CSS
 - Supabase Auth + PostgreSQL (RLS enabled)
 
@@ -36,4 +37,4 @@ This is intentionally a manual one-time step; public signup cannot assign admin 
 See [Partner API documentation](/docs/partner-api). New partner applications must be approved before API access is enabled.
 
 ## Deployment
-Import this repository into Vercel and configure the environment variables above for Production and Preview. The app supports the modern Supabase integration variable names and legacy anon/service-role names. Environment variable changes require a new deployment. The custom domain is intentionally deferred.
+Import this repository into Vercel and configure the environment variables above for Production and Preview. The app supports the modern Supabase integration variable names and legacy anon/service-role names. Environment variable changes require a new deployment. After connecting the production domain in Vercel, assign it to the production deployment and verify DNS and HTTPS.
