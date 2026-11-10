@@ -5,7 +5,7 @@ import { startSurvey } from "@/app/surveys/actions";
 import { ArrowLeft, Clock, ClipboardList } from "lucide-react";
 
 export default async function SurveyDetail({ params, searchParams }: { params: { id: string }; searchParams: { error?: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data: survey } = await supabase.from("surveys").select("*").eq("id",params.id).eq("status","active").gt("reward_rwf",0).maybeSingle();
