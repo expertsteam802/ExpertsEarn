@@ -9,7 +9,7 @@ type ImportQuestion = {
 };
 
 export async function importQuestions(rows: ImportQuestion[]) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Sign in required.");
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
@@ -54,7 +54,7 @@ export async function importQuestions(rows: ImportQuestion[]) {
 }
 
 export async function createRandomSurvey(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const title = String(formData.get("title") || "").trim();
@@ -74,7 +74,7 @@ export async function createRandomSurvey(formData: FormData) {
 
 
 export async function generateStarterSurveys(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const surveyCount = Number(formData.get("survey_count") || 100);
