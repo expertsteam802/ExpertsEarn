@@ -31,6 +31,7 @@ export default async function AdminPage({searchParams}:{searchParams:{error?:str
  const partnerUsageUsd=Number(financeSummary?.partner_usage_usd||0);
  const partnerRespondentRewards=Number(financeSummary?.respondent_rewards_rwf||0);
  const partnerUsageRwf=Number(financeSummary?.partner_usage_rwf_estimate||0);
+ const usdToRwf=Number(financeSummary?.usd_to_rwf_rate||0)>0;
  const estimatedPartnerMargin=Number(financeSummary?.estimated_margin_before_other_costs_rwf||0);
  const platformShareTarget=Number(financeSummary?.platform_share_target_rwf||0);
  const reserveTarget=Number(financeSummary?.reserve_target_rwf||0);
