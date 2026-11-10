@@ -2,7 +2,7 @@ import Script from "next/script";
 
 export function AdSenseScript() {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  if (!client || !/^ca-pub-\\d+$/.test(client)) return null;
+  if (!client || !/^ca-pub-\d+$/.test(client)) return null;
 
   return (
     <Script
