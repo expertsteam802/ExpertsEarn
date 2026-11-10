@@ -10,12 +10,12 @@ const starter = [
 
 export function PartnerSurveyBuilder({minPrice=0.2,maxPrice=0.5}:{minPrice?:number;maxPrice?:number}) {
   const [questions, setQuestions] = useState(JSON.stringify(starter, null, 2));
-  return <section className="surface mt-7 p-5 sm:p-6">
+  return <section className="surface mt-5 p-4 sm:p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div><p className="text-xs font-extrabold uppercase tracking-wider text-amber-600">Research builder</p><h2 className="mt-1 text-xl font-black text-slate-950">Create a survey</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Build a draft, set the audience and reward, then submit it for platform review before publishing.</p></div>
       <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-forest">Draft first · reviewed before launch</span>
     </div>
-    <form action={createPartnerSurvey} className="mt-5 grid gap-4 sm:grid-cols-2">
+    <form action={createPartnerSurvey} className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <label className="text-sm font-semibold sm:col-span-2">Survey title<input name="title" required minLength={3} maxLength={140} placeholder="Customer experience study" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold sm:col-span-2">Description<textarea name="description" rows={2} maxLength={5000} placeholder="Tell respondents what this research is about." className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Language<select name="language" className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3"><option value="en">English</option><option value="rw">Kinyarwanda</option><option value="fr">French</option></select></label>
@@ -33,7 +33,7 @@ export function PartnerSurveyBuilder({minPrice=0.2,maxPrice=0.5}:{minPrice?:numb
       <label className="text-sm font-semibold">Rwanda village<input name="target_village" maxLength={120} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Minimum age<input name="min_age" type="number" min="13" max="100" placeholder="18" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Maximum age<input name="max_age" type="number" min="13" max="100" placeholder="65" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
-      <label className="text-sm font-semibold sm:col-span-2">Questions (JSON)<textarea name="questions_json" required value={questions} onChange={event => setQuestions(event.target.value)} rows={12} spellCheck={false} className="mt-2 w-full rounded-xl border border-slate-200 p-3 font-mono text-xs leading-5" /></label>
+      <label className="text-sm font-semibold sm:col-span-2">Questions (JSON)<textarea name="questions_json" required value={questions} onChange={event => setQuestions(event.target.value)} rows={8} spellCheck={false} className="mt-2 w-full rounded-xl border border-slate-200 p-3 font-mono text-xs leading-5" /></label>
       <p className="text-xs leading-5 text-slate-500 sm:col-span-2">Each question needs a prompt and type: text, number, rating, yes_no, single_choice or multiple_choice. Choice questions use an options array. Up to 100 questions per survey.</p>
       <button className="min-h-12 rounded-xl bg-forest px-5 py-3 font-bold text-white sm:col-span-2">Create draft for review</button>
     </form>
