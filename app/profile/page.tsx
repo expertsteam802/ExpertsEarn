@@ -3,7 +3,7 @@ import {redirect} from "next/navigation";
 import {createClient} from "@/lib/supabase/server";
 import {ProfileEditor} from "@/components/profile-editor";
 export default async function ProfilePage(){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const [{data:profile},{data:submissions}]=await Promise.all([
   supabase.from("profiles").select("display_name,avatar_url,country_code,preferred_language,date_of_birth,gender,identity_verified_at,province,district,sector,cell,village,region,city").eq("id",user.id).maybeSingle(),
   supabase.from("identity_verification_submissions").select("id,status,submitted_at,admin_note").eq("user_id",user.id).order("submitted_at",{ascending:false}).limit(1)
