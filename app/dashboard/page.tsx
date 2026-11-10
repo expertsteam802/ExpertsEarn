@@ -5,7 +5,7 @@ import {DashboardShell} from "@/components/dashboard-shell";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export default async function DashboardPage(){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const [{data:profile},{data:wallet},{data:allSurveys},{data:responses}]=await Promise.all([
   supabase.from("profiles").select("display_name,avatar_url,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth").eq("id",user.id).maybeSingle(),
   supabase.from("wallets").select("balance_rwf,lifetime_earned_rwf").eq("user_id",user.id).maybeSingle(),
