@@ -5,7 +5,7 @@ import {createHash,randomBytes} from "node:crypto";
 import {redirect} from "next/navigation";
 
 export async function createPartnerApiKey(){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error("Sign in first.");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error("Sign in first.");
  const admin=createAdminClient();
  const {data:account}=await admin.from("partner_accounts").select("id,is_approved").eq("user_id",user.id).maybeSingle();
  if(!account||!account.is_approved)throw new Error("Your partner account must be approved before API access is enabled.");
@@ -17,7 +17,7 @@ export async function createPartnerApiKey(){
 }
 
 export async function createPartnerSurvey(formData:FormData){
- const supabase=createClient();
+ const supabase=await createClient();
  const {data:{user}}=await supabase.auth.getUser();
  if(!user)redirect("/login");
  const admin=createAdminClient();
