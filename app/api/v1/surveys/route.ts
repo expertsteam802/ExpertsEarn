@@ -32,9 +32,12 @@ export async function POST(request: NextRequest) {
   })) {
     return NextResponse.json({ error: "Each question needs a prompt and a supported question type" }, { status: 400 });
   }
-  const price = body.partner_price_usd === undefined ? 0.2 : Number(body.partner_price_usd);
-  if (!Number.isFinite(price) || price < 0.2 || price > 0.5) {
-    return NextResponse.json({ error: "Price per completed response must be between $0.20 and $0.50." }, { status: 400 });
+  const { data: pricingSetting } = await auth.admin.from("platform_settings").select("value").eq("key","survey_pricing_usd").maybeSingle();
+  const minPrice = Number(pricingSetting?.value?.min ?? 0.2);
+  const maxPrice = Number(pricingSetting?.value?.max ?? 0.5);
+  const price = body.partner_price_usd === undefined ? minPrice : Number(body.partner_price_usd);
+  if (!Number.isFinite(price) || price < minPrice || price > maxPrice) {
+    return NextResponse.json({ error: `Price per completed response must be between ${minPrice.toFixed(2)} and ${maxPrice.toFixed(2)}.` }, { status: 400 });
   }
   const responseLimit = body.response_limit === undefined || body.response_limit === null ? null : Number(body.response_limit);
   const minAge = body.min_age === undefined || body.min_age === null ? null : Number(body.min_age);
