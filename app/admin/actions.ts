@@ -43,12 +43,21 @@ export async function updatePlatformSetting(formData: FormData) {
   if (!user) redirect("/login");
   const key = String(formData.get("key") || "");
   const raw = String(formData.get("value") || "");
-  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding", "location_cpm_rates"];
+  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding", "location_cpm_rates", "usd_to_rwf_rate"];
   if (!allowed.includes(key)) return {ok:false,error:"This setting is not allowed."};
   let value: unknown;
   try { value = JSON.parse(raw); } catch { return {ok:false,error:"Enter valid JSON before saving."}; }
   if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) return {ok:false,error:"Daily survey cap must be between 1 and 500."};
   if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) return {ok:false,error:"Minimum payout must be between 1,000 and 10,000,000 RWF."};
+  if (key === "usd_to_rwf_rate" && (!Number.isFinite(Number(value)) || Number(value) < 1 || Number(value) > 100000)) return {ok:false,error:"Enter a valid RWF per USD exchange rate."};
+  if (key === "revenue_splits") {
+    const split=value as any; const partner=split?.partner;
+    if (!partner || !["owner","respondent","reserve"].every(k=>Number.isFinite(partner[k]) && partner[k]>=0 && partner[k]<=100) || partner.owner+partner.respondent+partner.reserve!==100) return {ok:false,error:"Partner revenue shares must total exactly 100%."};
+  }
+  if (key === "survey_pricing_usd") {
+    const pricing=value as any;
+    if (!pricing || !Number.isFinite(pricing.min) || !Number.isFinite(pricing.max) || pricing.min<0.01 || pricing.max>1000 || pricing.min>pricing.max) return {ok:false,error:"Enter a valid minimum and maximum partner price."};
+  }
   if (key === "location_cpm_rates") {
     if (!value || typeof value !== "object" || Array.isArray(value)) return {ok:false,error:"Location CPM settings must be a JSON object."};
     const config=value as {default_floor_usd?:number;countries?:Record<string,{floor_cpm_usd?:number}>};
