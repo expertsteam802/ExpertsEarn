@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Trophy } from "lucide-react";
 
 export default async function LeaderboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_public_leaderboard");
   const rows = data || [];
   return <main className="min-h-screen py-10"><div className="container max-w-3xl">
