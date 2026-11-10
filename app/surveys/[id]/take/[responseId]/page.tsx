@@ -3,7 +3,7 @@ import { notFound,redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SurveyRunner } from "@/components/survey-runner";
 export default async function TakeSurvey({params}:{params:{id:string;responseId:string}}){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const {data:response}=await supabase.from("survey_responses").select("id,status,respondent_id").eq("id",params.responseId).eq("survey_id",params.id).maybeSingle();
  if(!response||response.respondent_id!==user.id||response.status!=="in_progress")notFound();
  const {data:survey}=await supabase.from("surveys").select("id,title").eq("id",params.id).maybeSingle();if(!survey)notFound();
