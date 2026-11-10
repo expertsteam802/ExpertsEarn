@@ -7,7 +7,7 @@ async function requireAdmin(supabase: ReturnType<typeof createClient>, userId: s
 }
 
 export async function updatePayout(formData:FormData){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const id=String(formData.get("payout_id")||"");const status=String(formData.get("status")||"");
  const note=String(formData.get("note")||"");
  const {error}=await supabase.rpc("admin_update_payout",{p_payout_id:id,p_status:status,p_note:note});
@@ -15,7 +15,7 @@ export async function updatePayout(formData:FormData){
  redirect("/admin?tab=payouts&updated=1");
 }
 export async function approvePartner(formData:FormData){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  await requireAdmin(supabase,user.id);
  const id=String(formData.get("partner_id")||"");
  if(!id)redirect("/admin?tab=partners&error=invalid_partner");
@@ -25,7 +25,7 @@ export async function approvePartner(formData:FormData){
 }
 
 export async function setSurveyStatus(formData: FormData) {
-  const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser();
+  const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
   if(!user) return {ok:false,error:"Please sign in again."};
   const surveyId=String(formData.get("survey_id")||""); const status=String(formData.get("status")||"");
   if(!surveyId||!["draft","active","paused","completed","archived"].includes(status)) return {ok:false,error:"Invalid survey status."};
@@ -33,7 +33,7 @@ export async function setSurveyStatus(formData: FormData) {
   return error?{ok:false,error:error.message}:{ok:true,message:"Survey status updated."};
 }
 export async function updateUserRole(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const userId = String(formData.get("user_id") || "");
@@ -45,7 +45,7 @@ export async function updateUserRole(formData: FormData) {
 }
 
 export async function updatePlatformSetting(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   await requireAdmin(supabase,user.id);
@@ -79,7 +79,7 @@ export async function updatePlatformSetting(formData: FormData) {
 
 
 export async function updateSurveyTerms(formData: FormData) {
-  const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser();
+  const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
   if(!user) return {ok:false,error:"Please sign in again."};
   const surveyId=String(formData.get("survey_id")||""); const reward=Number(formData.get("reward_rwf"));
   const limitRaw=String(formData.get("response_limit")||"").trim(); const limit=limitRaw?Number(limitRaw):null;
@@ -88,7 +88,7 @@ export async function updateSurveyTerms(formData: FormData) {
   return error?{ok:false,error:error.message}:{ok:true,message:"Survey terms saved."};
 }
 export async function bulkUpdateSurveyStatus(formData: FormData) {
-  const supabase=createClient(); const {data:{user}}=await supabase.auth.getUser();
+  const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
   if(!user) return {ok:false,error:"Please sign in again."};
   const ids=formData.getAll("survey_ids").map(String).filter(Boolean); const status=String(formData.get("status")||"");
   if(!ids.length||ids.length>50||!["active","paused","archived"].includes(status)) return {ok:false,error:"Select between 1 and 50 surveys and choose a valid action."};
@@ -97,7 +97,7 @@ export async function bulkUpdateSurveyStatus(formData: FormData) {
 }
 
 export async function bulkUpdateSurveyRewards(formData: FormData) {
-  const supabase=createClient();
+  const supabase=await createClient();
   const {data:{user}}=await supabase.auth.getUser();
   if(!user) return {ok:false,error:"Please sign in again."};
   const ids=formData.getAll("survey_ids").map(String).filter(Boolean);
