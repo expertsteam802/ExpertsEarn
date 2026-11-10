@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { reviewIdentity } from "./actions";
 
-export default async function IdentityReviewPage({ searchParams }: { searchParams: { error?: string; updated?: string } }) {
+export default async function IdentityReviewPage({ searchParams }: { searchParams: Promise<{ error?: string; updated?: string }> }) {
+  const query = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -25,8 +26,8 @@ export default async function IdentityReviewPage({ searchParams }: { searchParam
       <p className="mt-6 text-sm font-bold uppercase tracking-wider text-amber-600">Trust & safety</p>
       <h1 className="mt-1 text-3xl font-black text-slate-950">Identity verification</h1>
       <p className="mt-2 text-sm text-slate-500">Review private identity documents. Approving a submission enables wallet payouts for that account.</p>
-      {searchParams.error && <p className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{decodeURIComponent(searchParams.error)}</p>}
-      {searchParams.updated && <p className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">Verification review saved.</p>}
+      {query.error && <p className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{decodeURIComponent(query.error)}</p>}
+      {query.updated && <p className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">Verification review saved.</p>}
       <div className="mt-6 space-y-4">
         {items.map((item: any) => <section key={item.id} className="surface p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
