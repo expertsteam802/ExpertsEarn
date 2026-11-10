@@ -16,7 +16,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setBusy(false);
     if (result.error) { setError(result.error.message); return; }
     if (mode === "signup" && !result.data.session) { setError("Check your email to confirm your account, then log in."); return; }
-    router.push("/welcome"); router.refresh();
+    router.push(mode === "login" ? "/dashboard" : "/welcome"); router.refresh();
   }
   return <form onSubmit={submit} className="space-y-4">
     {mode === "signup" && <label className="block text-sm font-semibold text-slate-700">Your name<input required value={name} onChange={e=>setName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-forest" placeholder="Full name"/></label>}
