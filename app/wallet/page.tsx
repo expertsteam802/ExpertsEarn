@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Wallet as WalletIcon, ArrowLeft } from "lucide-react";
 
-export default async function WalletPage({ searchParams }: { searchParams: { payout?: string } }) {
+export default async function WalletPage({ searchParams }: { searchParams: Promise<{ payout?: string }> }) {
+  const query = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -14,7 +15,7 @@ export default async function WalletPage({ searchParams }: { searchParams: { pay
 
   return <main className="min-h-screen py-9"><div className="container max-w-3xl">
     <Link href="/dashboard" className="text-sm font-bold text-forest"><ArrowLeft className="mr-1 inline h-4 w-4"/> Dashboard</Link>
-    {searchParams.payout === "requested" && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">Your payout request was submitted. It is awaiting administrator processing; funds have not yet been sent.</p>}
+    {query.payout === "requested" && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">Your payout request was submitted. It is awaiting administrator processing; funds have not yet been sent.</p>}
     <div className="mt-5 rounded-2xl bg-forest p-7 text-white">
       <WalletIcon className="h-6 w-6 text-amber-300"/>
       <p className="mt-4 text-sm text-emerald-100">Available balance</p>

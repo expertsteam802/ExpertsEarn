@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { QuestionBankImporter } from "@/components/question-bank-importer";
 import { createRandomSurvey, generateStarterSurveys } from "./actions";
 
-export default async function QuestionBankPage({ searchParams }: { searchParams: { error?: string; created?: string; starter_generated?: string } }) {
+export default async function QuestionBankPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; starter_generated?: string }> }) {
+  const query = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -20,9 +21,9 @@ export default async function QuestionBankPage({ searchParams }: { searchParams:
     <p className="mt-6 text-sm font-bold uppercase tracking-wider text-amber-600">Survey engine</p>
     <h1 className="mt-1 text-3xl font-black text-slate-950">Question bank</h1>
     <div className="surface mt-5 flex flex-wrap items-center justify-between gap-4 p-5"><div><p className="text-sm text-slate-500">Questions currently stored</p><p className="mt-1 text-3xl font-black text-forest">{(count ?? 0).toLocaleString()}</p></div><div className="text-right"><p className="text-sm font-bold text-slate-800">Target: 10,000+</p><p className="mt-1 text-xs text-slate-500">English · Kinyarwanda · French</p></div></div>
-    {searchParams.error && <p className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{decodeURIComponent(searchParams.error)}</p>}
-    {searchParams.created && <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">Random survey created as a draft: {searchParams.created}</p>}
-    {searchParams.starter_generated && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{searchParams.starter_generated} starter surveys were generated as drafts. Review and publish them from Creator Studio.</p>}
+    {query.error && <p className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{decodeURIComponent(query.error)}</p>}
+    {query.created && <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">Random survey created as a draft: {query.created}</p>}
+    {query.starter_generated && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{query.starter_generated} starter surveys were generated as drafts. Review and publish them from Creator Studio.</p>}
     <section className="surface mt-6 p-6">
       <h2 className="text-lg font-black text-slate-950">Generate 100 starter surveys</h2>
       <p className="mt-2 text-sm text-slate-500">Creates draft surveys across all eight research categories. Set the reward here; every completed response earns that exact RWF amount after the survey is published.</p>
