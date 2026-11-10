@@ -11,7 +11,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError("");
     const result = mode === "signup"
-      ? await supabase.auth.signUp({ email, password, options: { data: { display_name: name } } })
+      ? await supabase.auth.signUp({ email, password, options: { data: { display_name: name }, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       : await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (result.error) { setError(result.error.message); return; }
