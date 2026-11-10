@@ -4,7 +4,7 @@ import {createClient} from "@/lib/supabase/server";
 import {PartnerApiKey} from "@/components/partner-api-key";
 import {PartnerSurveyBuilder} from "@/components/partner-survey-builder";
 export default async function PartnerDashboard({searchParams}:{searchParams:{error?:string;created?:string}}){
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const {data:account}=await supabase.from("partner_accounts").select("*").eq("user_id",user.id).maybeSingle();
  if(!account)redirect("/partners/apply");
  const [{data:surveys},{data:ledger},{data:pricingRow}]=await Promise.all([
