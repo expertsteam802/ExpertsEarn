@@ -10,7 +10,7 @@ export default async function AdminPage({searchParams}:{searchParams:{error?:str
  const activeTab = ["overview","users","money","partners","surveys","payouts","settings"].includes(searchParams.tab||"") ? searchParams.tab! : "overview";
  const settingTabs = [["daily_survey_cap","Survey limits"],["minimum_payout_rwf","Payout rules"],["revenue_splits","Revenue split"],["survey_pricing_usd","Partner pricing"],["supported_languages","Languages"],["public_branding","Branding"]];
  const activeSetting = settingTabs.some(([key])=>key===searchParams.setting) ? searchParams.setting : "daily_survey_cap";
- const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();if(profile?.role!=="admin")redirect("/dashboard");
  const [{count:users},{count:surveys},{data:payouts},{data:partners},{data:surveyRows},{data:walletRows},{data:userRows},{data:settings},{count:pendingVerifications}]=await Promise.all([
   supabase.from("profiles").select("*",{count:"exact",head:true}),
