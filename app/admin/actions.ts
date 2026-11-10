@@ -1,6 +1,11 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+async function requireAdmin(supabase: ReturnType<typeof createClient>, userId: string) {
+  const { data: profile, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+  if (error || profile?.role !== "admin") redirect("/dashboard?error=admin_required");
+}
+
 export async function updatePayout(formData:FormData){
  const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const id=String(formData.get("payout_id")||"");const status=String(formData.get("status")||"");
@@ -11,8 +16,10 @@ export async function updatePayout(formData:FormData){
 }
 export async function approvePartner(formData:FormData){
  const supabase=createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ await requireAdmin(supabase,user.id);
  const id=String(formData.get("partner_id")||"");
- const {error}=await supabase.from("partner_accounts").update({is_approved:true}).eq("id",id);
+ if(!id)redirect("/admin?tab=partners&error=invalid_partner");
+ const {error}=await supabase.from("partner_accounts").update({is_approved:true}).eq("id",id).select("id").single();
  if(error)redirect("/admin?tab=partners&error="+encodeURIComponent(error.message));
  redirect("/admin?tab=partners&partner_approved=1");
 }
@@ -41,6 +48,7 @@ export async function updatePlatformSetting(formData: FormData) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  await requireAdmin(supabase,user.id);
   const key = String(formData.get("key") || "");
   const raw = String(formData.get("value") || "");
   const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding", "location_cpm_rates", "usd_to_rwf_rate"];
@@ -64,7 +72,7 @@ export async function updatePlatformSetting(formData: FormData) {
     if (typeof config.default_floor_usd!=="number" || !Number.isFinite(config.default_floor_usd) || config.default_floor_usd<0 || config.default_floor_usd>1000 || !config.countries || typeof config.countries!=="object" || Array.isArray(config.countries)) return {ok:false,error:"Set a valid default_floor_usd and countries object."};
     for (const [country,rate] of Object.entries(config.countries)) if (!/^[A-Z]{2}$/.test(country) || !rate || typeof rate.floor_cpm_usd!=="number" || !Number.isFinite(rate.floor_cpm_usd) || rate.floor_cpm_usd<0 || rate.floor_cpm_usd>1000) return {ok:false,error:"Each country must use a two-letter ISO code and a non-negative floor_cpm_usd."};
   }
-  const { error } = await supabase.from("platform_settings").update({ value: value as any, updated_at: new Date().toISOString() }).eq("key", key);
+  const { error } = await supabase.from("platform_settings").update({ value: value as any, updated_at: new Date().toISOString() }).eq("key", key).select("key").single();
   if (error) return {ok:false,error:error.message};
   return {ok:true,message:"Setting saved."};
 }
