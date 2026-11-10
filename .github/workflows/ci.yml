@@ -16,6 +16,10 @@ jobs:
         with:
           node-version: 20
       - run: npm install
+      - name: Report dependency advisories
+        run: |
+          npm audit --json > npm-audit.json || true
+          node -e 'const a=require("./npm-audit.json"); console.log(JSON.stringify(a.vulnerabilities || {}, null, 2));'
       - run: npm run typecheck
       - run: npm run build
         env:
