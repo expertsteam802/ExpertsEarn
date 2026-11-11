@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "How ExpertsEarn Works",
+  description: "See how ExpertsEarn survey eligibility, honest participation, RWF rewards, wallet balances and payout requests work for members.",
+  alternates: { canonical: "/how-it-works" },
+};
+
 import Link from "next/link";
 import {Brand} from "@/components/brand";
 import {AdSenseScript} from "@/components/adsense-script";

@@ -1,10 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root{color-scheme:dark;--ink:#090a0f;--panel:#111219;--panel-2:#171821;--line:rgba(231,220,199,.12);--ivory:#f2ecdf;--muted:#a5a0a0;--metal:#c6a873;font-size:14px}
+:root{color-scheme:dark;--ink:#090a0f;--panel:#111219;--panel-2:#171821;--line:rgba(231,220,199,.12);--ivory:#f2ecdf;--muted:#a5a0a0;--metal:#c6a873;font-size:15px}
 *{box-sizing:border-box}
-html{background:var(--ink);scroll-behavior:smooth}
-body{margin:0;min-height:100vh;background:var(--ink);color:var(--ivory);font-family:"DM Sans",ui-sans-serif,system-ui,sans-serif;line-height:1.45}
+html{background:var(--ink);scroll-behavior:smooth;scrollbar-gutter:stable}
+body{margin:0;min-height:100vh;overflow-x:hidden;background:var(--ink);color:var(--ivory);font-family:"DM Sans",ui-sans-serif,system-ui,sans-serif;line-height:1.45}
 button,a{-webkit-tap-highlight-color:transparent}
 a{color:inherit;text-decoration:none}
 button,input,textarea,select{font:inherit}
@@ -29,3 +29,9 @@ input::placeholder,textarea::placeholder{color:#777780}
 @media(max-width:640px){:root{font-size:14px}.surface{border-radius:14px}}
 /* Legacy utility classes mapped to the ivory and metallic palette. */
 .text-forest{color:#c6a873!important}.bg-forest{background-color:#a88753!important;color:#111116!important}.text-emerald-700,.text-emerald-800{color:#d8bd8e!important}.bg-emerald-50{background:rgba(198,168,115,.12)!important}.bg-emerald-100{background:rgba(198,168,115,.18)!important}.text-amber-600,.text-amber-700{color:#d6bd92!important}.bg-amber-100{background:rgba(198,168,115,.16)!important}.bg-mist{background:#111219!important}.bg-slate-50,.bg-slate-100{background:#171821!important}.bg-white{background:#111219!important}.text-slate-950,.text-slate-900,.text-slate-800{color:#f0e9dc!important}.text-slate-700,.text-slate-600,.text-slate-500{color:#aaa6a2!important}.text-slate-400{color:#85818a!important}.border-slate-100,.border-slate-200{border-color:var(--line)!important}.shadow-forest\/15,.shadow-forest\/20{box-shadow:0 8px 24px rgba(0,0,0,.2)!important}
+/* Keep the document scrollbar at the browser edge; dashboard panels do not create nested scroll areas. */
+html{scrollbar-width:thin;scrollbar-color:rgba(198,168,115,.55) #0b0c12}
+html::-webkit-scrollbar{width:10px}
+html::-webkit-scrollbar-track{background:#0b0c12}
+html::-webkit-scrollbar-thumb{background:rgba(198,168,115,.5);border:2px solid #0b0c12;border-radius:999px}
+html::-webkit-scrollbar-thumb:hover{background:rgba(198,168,115,.75)}

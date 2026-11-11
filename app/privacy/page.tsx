@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "Read how ExpertsEarn handles account information, survey responses, wallet and payout records, identity verification data, cookies and advertising.",
+  alternates: { canonical: "/privacy" },
+};
+
 import Link from "next/link";
 import {Brand} from "@/components/brand";
 

@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Research Partners",
+  description: "Use ExpertsEarn to create targeted surveys, reach eligible respondents, manage research and access survey responses through the partner API.",
+  alternates: { canonical: "/partners" },
+};
+
 import Link from "next/link";
 import {AdSenseScript} from "@/components/adsense-script";
 import { Code2, Target, FileSpreadsheet, ArrowRight } from "lucide-react";

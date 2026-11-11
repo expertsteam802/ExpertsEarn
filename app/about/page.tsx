@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About ExpertsEarn",
+  description: "Learn about ExpertsEarn, a research participation and survey rewards platform built by ExpertsTeam, connecting people and organizations through responsible research.",
+  alternates: { canonical: "/about" },
+};
+
 import Link from "next/link"; import {Brand} from "@/components/brand";
 import {AdSenseScript} from "@/components/adsense-script";
 export default function AboutPage(){return <main className="min-h-screen bg-[#090a0f]"><AdSenseScript/><header className="container flex h-20 items-center justify-between"><Brand/><Link href="/" className="text-sm font-bold text-[#c6a873]">Back home</Link></header><section className="container max-w-4xl py-20"><p className="eyebrow">About ExpertsEarn</p><h1 className="mt-5 text-5xl font-semibold tracking-tight text-[#f2ecdf]">Better decisions begin with real perspectives.</h1><p className="mt-7 max-w-3xl text-lg leading-8 text-[#aaa6a2]">ExpertsEarn is a research participation platform by ExpertsTeam. We connect people and organizations through structured surveys, responsible data collection and transparent reward records.</p><div className="surface mt-12 p-8"><h2 className="text-xl font-bold text-[#f2ecdf]">Our principles</h2><ul className="mt-5 space-y-4 text-sm leading-7 text-[#aaa6a2]"><li><strong className="text-[#d7c29d]">Respect for participants.</strong> Clear survey terms, honest participation and understandable reward status.</li><li><strong className="text-[#d7c29d]">Useful research.</strong> Audience targeting and quality controls designed to support meaningful findings.</li><li><strong className="text-[#d7c29d]">Responsible handling.</strong> Access controls and privacy-aware data practices across the platform.</li></ul></div></section></main>}
