@@ -42,6 +42,8 @@ export function ProfileEditor({ profile, submission }: Props) {
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [submissionId, setSubmissionId] = useState<string | null>(submission?.id ?? null);
+  const [submissionStatus, setSubmissionStatus] = useState<string | null>(submission?.status ?? null);
 
   useEffect(() => {
     let active = true;
@@ -105,11 +107,12 @@ export function ProfileEditor({ profile, submission }: Props) {
     const path = user.id + "/" + Date.now() + "-" + safeName;
     const { error: uploadError } = await supabase.storage.from("identity-documents").upload(path, file, { contentType: file.type, upsert: false });
     if (uploadError) { setError(uploadError.message); setBusy(""); return; }
-    const { error: insertError } = await supabase.from("identity_verification_submissions").insert({ user_id: user.id, object_path: path, status: "pending" });
+    const { data: createdSubmission, error: insertError } = await supabase.from("identity_verification_submissions").insert({ user_id: user.id, object_path: path, status: "pending" }).select("id,status").single();
     if (insertError) {
       await supabase.storage.from("identity-documents").remove([path]);
       setError(insertError.message); setBusy(""); return;
     }
+    setSubmissionId(createdSubmission.id); setSubmissionStatus(createdSubmission.status);
     setFile(null); setBusy(""); setMessage("Identity document submitted securely and is awaiting admin review."); router.refresh();
   }
 
@@ -156,9 +159,9 @@ export function ProfileEditor({ profile, submission }: Props) {
     <section className="surface p-6">
       <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-forest"/><h2 className="text-lg font-black text-slate-950">Identity verification</h2></div>
       {profile.identity_verified_at ? <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-emerald-700"><CheckCircle2 className="h-4 w-4"/> Identity verified. Payouts are enabled.</p>
-      : submission?.status === "pending" ? <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm font-semibold text-amber-900">Your document is securely submitted and awaiting review.</p>
+      : (submissionStatus === "pending" || submission?.status === "pending") ? <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-100"><p className="font-semibold">Your document is securely submitted and awaiting review.</p><p className="mt-2 text-xs text-amber-100/80">Keep this reference ID for support:</p><code className="mt-2 block break-all rounded-lg bg-black/20 p-2 text-xs">{submissionId ?? submission?.id}</code></div>
       : <form onSubmit={uploadIdentity} className="mt-4 space-y-3"><p className="text-sm text-slate-500">Upload a clear national ID, passport, or accepted identity document. Only you and authorized administrators can access this private file.</p><input type="file" accept="image/jpeg,image/png,application/pdf" onChange={e=>setFile(e.target.files?.[0]||null)} className="block w-full text-sm"/><button disabled={busy!==""} className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-bold text-white disabled:opacity-60"><Upload className="h-4 w-4"/>{busy==="identity"?"Uploading…":"Submit identity document"}</button></form>}
-      {submission?.status === "rejected" && <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Your previous document was not approved. {submission.admin_note || "Please upload a clearer document."}</p>}
+      {(submissionStatus === "rejected" || submission?.status === "rejected") && <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Your previous document was not approved. {submission.admin_note || "Please upload a clearer document."}</p>}
     </section>
 
     {(message||error)&&<p role="status" className={error?"rounded-xl bg-rose-50 p-3 text-sm text-rose-700":"rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800"}>{error||message}</p>}
