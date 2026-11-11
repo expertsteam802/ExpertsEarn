@@ -5,7 +5,7 @@ import {Brand} from "@/components/brand";
 import {AdSenseScript} from "@/components/adsense-script";
 
 export const metadata: Metadata = {
-  title: "ExpertsEarn | Earn rewards for sharing your perspective",
+  title: "Earn rewards for sharing your perspective",
   description: "Join ExpertsEarn to take eligible research surveys, track transparent RWF rewards and help organizations make better decisions. Built by ExpertsTeam.",
   alternates: { canonical: "/" },
 };
