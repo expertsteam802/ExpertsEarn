@@ -11,13 +11,16 @@ export default async function IdentityReviewPage({ searchParams }: { searchParam
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/dashboard");
 
-  const { data: submissions } = await supabase.from("identity_verification_submissions")
-    .select("id,user_id,object_path,status,admin_note,submitted_at,profiles(display_name)")
-    .order("submitted_at", { ascending: false }).limit(100);
+  // user_id and reviewed_by both reference profiles, so the relationship must be explicit.
+  const { data: submissions, error: submissionsError } = await supabase
+    .from("identity_verification_submissions")
+    .select("id,user_id,object_path,status,admin_note,submitted_at,profiles:profiles!identity_verification_submissions_user_id_fkey(display_name)")
+    .order("submitted_at", { ascending: false })
+    .limit(100);
 
   const items = await Promise.all((submissions || []).map(async (item: any) => {
-    const { data } = await supabase.storage.from("identity-documents").createSignedUrl(item.object_path, 900);
-    return { ...item, signedUrl: data?.signedUrl || null };
+    const { data, error } = await supabase.storage.from("identity-documents").createSignedUrl(item.object_path, 900);
+    return { ...item, signedUrl: error ? null : data?.signedUrl || null };
   }));
 
   return <main className="min-h-screen py-9">
@@ -26,8 +29,9 @@ export default async function IdentityReviewPage({ searchParams }: { searchParam
       <p className="mt-6 text-sm font-bold uppercase tracking-wider text-amber-600">Trust & safety</p>
       <h1 className="mt-1 text-3xl font-black text-slate-950">Identity verification</h1>
       <p className="mt-2 text-sm text-slate-500">Review private identity documents. Approving a submission enables wallet payouts for that account.</p>
-      {query.error && <p className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{decodeURIComponent(query.error)}</p>}
+      {query.error && <p className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{query.error}</p>}
       {query.updated && <p className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">Verification review saved.</p>}
+      {submissionsError && <p role="alert" className="mt-5 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Could not load verification requests: {submissionsError.message}</p>}
       <div className="mt-6 space-y-4">
         {items.map((item: any) => <section key={item.id} className="surface p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -43,7 +47,7 @@ export default async function IdentityReviewPage({ searchParams }: { searchParam
           </form>}
           {item.admin_note && <p className="mt-3 text-sm text-slate-500">Note: {item.admin_note}</p>}
         </section>)}
-        {items.length === 0 && <div className="surface p-8 text-center text-sm text-slate-500">No identity documents have been submitted yet.</div>}
+        {!submissionsError && items.length === 0 && <div className="surface p-8 text-center text-sm text-slate-500">No identity documents have been submitted yet.</div>}
       </div>
     </div>
   </main>;
