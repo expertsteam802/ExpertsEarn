@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://mywire.org";
+const SITE_URL = "https://expertsearn.mywire.org";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const publicPages = [
