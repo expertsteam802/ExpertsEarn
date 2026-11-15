@@ -10,7 +10,7 @@ const SITE_DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
+    default: "Experts Earn",
     template: "%s | ExpertsEarn",
   },
   description: SITE_DESCRIPTION,
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
+    title: "Experts Earn",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     locale: "en_RW",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
+    title: "Experts Earn",
     description: SITE_DESCRIPTION,
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
@@ -44,11 +44,12 @@ const organizationSchema = {
       "@type": "Organization",
       "@id": "https://expertsearn.mywire.org/#organization",
       name: "ExpertsEarn",
-      alternateName: ["ExpertsEarn by ExpertsTeam"],
+      alternateName: ["Experts Earn", "ExpertsEarn by ExpertsTeam"],
       url: "https://expertsearn.mywire.org/",
       email: "mucyochristhecla@gmail.com",
       parentOrganization: { "@type": "Organization", name: "ExpertsTeam" },
       description: SITE_DESCRIPTION,
+      slogan: "Your insight has value.",
       knowsLanguage: ["en", "rw", "fr"],
       areaServed: [{ "@type": "Country", name: "Rwanda" }, "International markets"],
     },
