@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://expertsearn.mywire.org";
+const SITE_URL = "https://mywire.org";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/about", "/contact", "/how-it-works", "/partners", "/privacy", "/terms", "/docs/"],
         disallow: [
           "/admin",
           "/dashboard",
@@ -26,5 +26,6 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }
