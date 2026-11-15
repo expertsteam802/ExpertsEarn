@@ -5,7 +5,7 @@ import "./globals.css";
 const SITE_URL = "https://expertsearn.mywire.org";
 const SITE_NAME = "ExpertsEarn";
 const SITE_DESCRIPTION =
-  "Find paid online surveys and research studies in Rwanda. Share your perspective, discover eligible opportunities and earn transparent rewards in RWF with ExpertsEarn.";
+  "ExpertsEarn is an online survey and market research rewards platform by ExpertsTeam and Chris Programs. Discover eligible paid surveys, share your views and earn RWF rewards in Rwanda.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
