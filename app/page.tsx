@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight, ShieldCheck, Wallet, Globe2, ChartNoAxesCombined, MoveUpRight } from "lucide-react";
 import { Brand } from "@/components/brand";
-import { MonetagScript } from "@/components/monetag-script";
 
 export const metadata: Metadata = {
   title: { absolute: "Experts Earn" },
@@ -43,7 +42,6 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#090a0f]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema).replace(/</g, "\\u003c") }} />
-      <MonetagScript />
       <header className="container flex h-[86px] items-center justify-between border-b border-white/[.07]">
         <Brand />
         <nav aria-label="Main navigation" className="hidden items-center gap-8 text-[13px] font-semibold text-[#aaa6a2] md:flex">
