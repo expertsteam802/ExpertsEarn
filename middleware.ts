@@ -8,37 +8,39 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-expertearn-monetag-eligible", monetagEligible ? "1" : "0");
   let response = NextResponse.next({ request: { headers: requestHeaders } });
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
-  const key =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    process.env.SUPABASE_PUBLISHABLE_KEY ??
-    process.env.SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error("Supabase URL or publishable key is missing. Configure the ExpertsEarn environment variables.");
-  }
-
-  const supabase = createServerClient(url, key, {
-    cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll: (cookiesToSet: { name: string; value: string; options: any }[]) => {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request: { headers: requestHeaders } });
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-      }
-    }
-  });
 
   if (pathname.startsWith("/dashboard")) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+    const key =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+      process.env.SUPABASE_PUBLISHABLE_KEY ??
+      process.env.SUPABASE_ANON_KEY;
+
+    if (!url || !key) {
+      throw new Error("Supabase URL or publishable key is missing. Configure the ExpertsEarn environment variables.");
+    }
+
+    const supabase = createServerClient(url, key, {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet: { name: string; value: string; options: any }[]) => {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request: { headers: requestHeaders } });
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        },
+      },
+    });
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
+
   return response;
 }
 
