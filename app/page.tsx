@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight, ShieldCheck, Wallet, Globe2, ChartNoAxesCombined, MoveUpRight } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { MonetagInPage, MonetagNotificationOptIn } from "@/components/monetag-ads";
 
 export const metadata: Metadata = {
   title: { absolute: "Experts Earn" },
@@ -42,6 +43,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#090a0f]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema).replace(/</g, "\\u003c") }} />
+      <MonetagInPage />
       <header className="container flex h-[86px] items-center justify-between border-b border-white/[.07]">
         <Brand />
         <nav aria-label="Main navigation" className="hidden items-center gap-8 text-[13px] font-semibold text-[#aaa6a2] md:flex">
@@ -110,7 +112,7 @@ export default function HomePage() {
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-6 gap-y-3">
           <Link href="/how-it-works">How it works</Link><Link href="/partners">For research teams</Link><Link href="/about">About us</Link><Link href="/contact">Contact us</Link><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link>
         </nav>
-        <span>Insight has value.</span>
+        <div><span>Insight has value.</span><MonetagNotificationOptIn /></div>
       </footer>
     </main>
   );
