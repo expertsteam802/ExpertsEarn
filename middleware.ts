@@ -2,7 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const excludedAdPaths = ["/wallet/payout", "/profile", "/admin/identity", "/verification", "/verify", "/identity"];
+  const monetagEligible = !excludedAdPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-expertearn-monetag-eligible", monetagEligible ? "1" : "0");
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
@@ -19,20 +24,24 @@ export async function middleware(request: NextRequest) {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet: { name: string; value: string; options: any }[]) => {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        response = NextResponse.next({ request: { headers: requestHeaders } });
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       }
     }
   });
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (pathname.startsWith("/dashboard")) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+      return NextResponse.redirect(loginUrl);
+    }
   }
   return response;
 }
 
-export const config = { matcher: ["/dashboard/:path*"] };
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|woff2?)$).*)"],
+};
