@@ -30,15 +30,8 @@ export function NotificationOptIn() {
       await navigator.serviceWorker.register("/sw.js", { scope: "/" });
       await navigator.serviceWorker.ready;
 
-      // Add the supplied notification tag to <head> only after explicit opt-in.
-      if (!document.getElementById("monetag-notification-12294874")) {
-        const script = document.createElement("script");
-        script.id = "monetag-notification-12294874";
-        script.src = "https://5gvci.com/act/files/tag.min.js?z=12294874";
-        script.async = true;
-        script.setAttribute("data-cfasync", "false");
-        document.head.appendChild(script);
-      }
+      // The Monetag notification tag is already installed statically in the
+      // server-rendered head. Do not inject a second copy after permission.
       setStatus("enabled");
     } catch (error) {
       console.error("ExpertsEarn notification setup failed", error);
