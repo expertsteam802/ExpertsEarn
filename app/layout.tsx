@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { PwaRegister } from "@/components/pwa-register";
-import { NotificationOptIn } from "@/components/notification-opt-in";
+import { MonetagRouteRuntime } from "@/components/monetag-route-runtime";
 import "./globals.css";
 
 const SITE_URL = "https://expertsearn.mywire.org";
@@ -76,6 +76,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         {monetagEligible && (
           <script
+            id="monetag-inpage-loader"
             dangerouslySetInnerHTML={{
               __html: "(function(s){s.dataset.zone='12294866',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
             }}
@@ -83,6 +84,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
         {monetagEligible && (
           <script
+            id="monetag-vignette-loader"
             dangerouslySetInnerHTML={{
               __html: "(function(s){s.dataset.zone='12294868',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
             }}
@@ -96,7 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body>{children}{monetagEligible && <NotificationOptIn />}<PwaRegister /></body>
+      <body>{children}<MonetagRouteRuntime /><PwaRegister /></body>
     </html>
   );
 }
