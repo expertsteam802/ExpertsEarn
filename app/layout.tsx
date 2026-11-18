@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
@@ -65,15 +66,20 @@ const organizationSchema = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const requestHeaders = await headers();
+  const monetagEligible = requestHeaders.get("x-expertearn-monetag-eligible") === "1";
+
   return (
     <html lang="en">
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var p=window.location.pathname;var excluded=["/wallet/payout","/profile","/admin/identity","/verification","/verify","/identity"];if(excluded.some(function(x){return p===x||p.indexOf(x+"/")===0;}))return;(function(s){s.dataset.zone='12294866',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));})();`,
-          }}
-        />
+        {monetagEligible && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: "(function(s){s.dataset.zone='12294866',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
+            }}
+          />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }}
