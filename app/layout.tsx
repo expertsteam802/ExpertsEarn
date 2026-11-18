@@ -2,15 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
-const SITE_URL = "https://mywire.org";
+const SITE_URL = "https://expertsearn.mywire.org";
 const SITE_NAME = "ExpertsEarn";
 const SITE_DESCRIPTION =
-  "Find paid online surveys and research studies in Rwanda. Share your perspective, discover eligible opportunities and earn transparent rewards in RWF with ExpertsEarn.";
+  "ExpertsEarn is an online survey and market research rewards platform by ExpertsTeam and Chris Programs. Discover eligible paid surveys, share your views and earn RWF rewards in Rwanda.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
+    default: "Experts Earn",
     template: "%s | ExpertsEarn",
   },
   description: SITE_DESCRIPTION,
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
+    title: "Experts Earn",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     locale: "en_RW",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
+    title: "Experts Earn",
     description: SITE_DESCRIPTION,
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
@@ -42,24 +42,25 @@ const organizationSchema = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://mywire.org/#organization",
+      "@id": "https://expertsearn.mywire.org/#organization",
       name: "ExpertsEarn",
-      alternateName: ["ExpertsEarn by ExpertsTeam"],
-      url: "https://mywire.org/",
+      alternateName: ["Experts Earn", "ExpertsEarn by ExpertsTeam"],
+      url: "https://expertsearn.mywire.org/",
       email: "mucyochristhecla@gmail.com",
       parentOrganization: { "@type": "Organization", name: "ExpertsTeam" },
       description: SITE_DESCRIPTION,
+      slogan: "Your insight has value.",
       knowsLanguage: ["en", "rw", "fr"],
       areaServed: [{ "@type": "Country", name: "Rwanda" }, "International markets"],
     },
     {
       "@type": "WebSite",
-      "@id": "https://mywire.org/#website",
-      url: "https://mywire.org/",
+      "@id": "https://expertsearn.mywire.org/#website",
+      url: "https://expertsearn.mywire.org/",
       name: "ExpertsEarn",
       alternateName: "ExpertsEarn by ExpertsTeam",
       inLanguage: ["en", "rw", "fr"],
-      publisher: { "@id": "https://mywire.org/#organization" },
+      publisher: { "@id": "https://expertsearn.mywire.org/#organization" },
     },
   ],
 };

@@ -5,12 +5,12 @@ import { Brand } from "@/components/brand";
 import { AdSenseScript } from "@/components/adsense-script";
 
 export const metadata: Metadata = {
-  title: "Paid Surveys & Research Rewards in Rwanda",
-  description: "Join ExpertsEarn to discover eligible paid online surveys in Rwanda, share your perspective and earn transparent RWF rewards. Research opportunities for local and international communities.",
+  title: { absolute: "Experts Earn" },
+  description: "Explore paid online surveys with ExpertsEarn, an ExpertsTeam platform by Chris Programs. Share your views and earn eligible RWF research rewards in Rwanda.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "ExpertsEarn | Paid Surveys & Research Rewards in Rwanda",
-    description: "Discover research studies, share your perspective and earn eligible rewards in RWF with ExpertsEarn.",
+    title: "Experts Earn",
+    description: "Find eligible paid surveys and market research studies with ExpertsEarn by ExpertsTeam and Chris Programs. Share your perspective and earn RWF rewards in Rwanda.",
     url: "/",
   },
 };
@@ -108,7 +108,7 @@ export default function HomePage() {
       </section>
 
       <footer className="container flex flex-col gap-6 py-9 text-xs text-[#77747a] sm:flex-row sm:items-center sm:justify-between">
-        <div><Brand /><p className="mt-3">© {new Date().getFullYear()} ExpertsEarn by ExpertsTeam.</p></div>
+        <div><Brand /><p className="mt-3">© {new Date().getFullYear()} ExpertsEarn by ExpertsTeam · Created by Chris Programs.</p></div>
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-6 gap-y-3">
           <Link href="/how-it-works">How it works</Link><Link href="/partners">For research teams</Link><Link href="/about">About us</Link><Link href="/contact">Contact us</Link><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link>
         </nav>
