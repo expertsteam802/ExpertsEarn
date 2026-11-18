@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { PwaRegister } from "@/components/pwa-register";
+import { NotificationOptIn } from "@/components/notification-opt-in";
 import "./globals.css";
 
 const SITE_URL = "https://expertsearn.mywire.org";
@@ -80,6 +81,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }}
           />
         )}
+        {monetagEligible && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: "(function(s){s.dataset.zone='12294868',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
+            }}
+          />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }}
@@ -88,7 +96,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body>{children}<PwaRegister /></body>
+      <body>{children}{monetagEligible && <NotificationOptIn />}<PwaRegister /></body>
     </html>
   );
 }
