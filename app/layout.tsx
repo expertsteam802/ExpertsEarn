@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { PwaRegister } from "@/components/pwa-register";
-import { SiteAdPlacements } from "@/components/site-ad-placements";
 import "./globals.css";
 
 const SITE_URL = "https://expertsearn.mywire.org";
@@ -71,6 +70,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var p=window.location.pathname;var excluded=["/wallet/payout","/profile","/admin/identity","/verification","/verify","/identity"];if(excluded.some(function(x){return p===x||p.indexOf(x+"/")===0;}))return;(function(s){s.dataset.zone='12294866',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));})();`,
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }}
         />
@@ -78,7 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body><SiteAdPlacements />{children}<PwaRegister /></body>
+      <body>{children}<PwaRegister /></body>
     </html>
   );
 }
