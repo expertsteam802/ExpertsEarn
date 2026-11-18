@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { completeSurvey } from "@/app/surveys/actions";
+import { MonetagScript } from "@/components/monetag-script";
 
 type Question = {
   id: string; position: number; required: boolean; prompt_override: string | null;
@@ -14,6 +15,7 @@ export function SurveyRunner({ responseId, questions }: { surveyId: string; resp
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState(0);
+  const [questionComplete, setQuestionComplete] = useState(false);
   const supabase = createClient();
   const current = questions[step];
   const setAnswer = (id: string, value: any) => setAnswers((previous) => ({ ...previous, [id]: value }));
@@ -35,7 +37,7 @@ export function SurveyRunner({ responseId, questions }: { surveyId: string; resp
     if (current.required && (value === undefined || value === "" || (Array.isArray(value) && value.length === 0))) { setError("Please answer this required question."); return; }
     setBusy(true); setError("");
     const saved = await saveCurrentAnswer();
-    if (saved) setStep((currentStep) => currentStep + 1);
+    if (saved) setQuestionComplete(true);
     setBusy(false);
   }
 
@@ -59,6 +61,8 @@ export function SurveyRunner({ responseId, questions }: { surveyId: string; resp
   }
 
   if (!questions.length) return <div className="surface p-6 text-sm text-slate-600">This survey has no questions yet. Please contact the survey publisher.</div>;
+
+  if (questionComplete) return <div className="space-y-4"><section className="surface p-6 text-center sm:p-8"><MonetagScript/><div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-emerald-700"><span className="text-2xl">✓</span></div><p className="mt-4 text-xs font-bold uppercase tracking-widest text-emerald-700">Question completed</p><h2 className="mt-2 text-2xl font-black text-slate-900">Great progress!</h2><p className="mt-2 text-sm leading-6 text-slate-500">Your answer has been saved. Take a moment before moving to the next question.</p><div className="my-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-5 text-left"><p className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Sponsored</p><p className="mt-1 text-xs text-slate-500">This advertising placement helps support ExpertsEarn.</p></div><button type="button" disabled={busy} onClick={() => { setQuestionComplete(false); if (step === questions.length - 1) { void submit(); } else { setStep((currentStep) => currentStep + 1); } }} className="min-h-12 w-full rounded-xl bg-forest px-5 font-bold text-white disabled:opacity-60">{step === questions.length - 1 ? "Continue to submit survey" : "Next question"}</button></section><p className="text-center text-xs text-slate-400">Ads are separate from survey answers and rewards. You do not need to click an ad to continue.</p></div>;
   const prompt = current.prompt_override || current.question_bank?.prompt || "Survey question";
   const type = current.question_type_override || current.question_bank?.question_type || "text";
   const options = current.options_override || current.question_bank?.options || [];
