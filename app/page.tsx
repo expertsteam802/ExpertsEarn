@@ -4,12 +4,12 @@ import { ArrowUpRight, ShieldCheck, Wallet, Globe2, ChartNoAxesCombined, MoveUpR
 import { Brand } from "@/components/brand";
 
 export const metadata: Metadata = {
-  title: { absolute: "Experts Earn" },
-  description: "Explore paid online surveys with ExpertsEarn, an ExpertsTeam platform by Chris Programs. Share your views and earn eligible RWF research rewards in Rwanda.",
+  title: { absolute: "Paid Online Surveys in Rwanda | ExpertsEarn" },
+  description: "Find eligible paid online surveys with ExpertsEarn. Share your opinions, take part in research and track approved rewards in Rwandan francs (RWF).",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Experts Earn",
-    description: "Find eligible paid surveys and market research studies with ExpertsEarn by ExpertsTeam and Chris Programs. Share your perspective and earn RWF rewards in Rwanda.",
+    title: "Paid Online Surveys in Rwanda | ExpertsEarn",
+    description: "Find eligible online surveys in Rwanda with ExpertsEarn. Share your perspective, take part in research and track approved rewards in RWF.",
     url: "/",
   },
 };
@@ -62,7 +62,7 @@ export default function HomePage() {
         <div className="container grid min-h-[690px] items-center gap-16 py-20 lg:grid-cols-[1.08fr_.92fr]">
           <div className="max-w-[730px]">
             <div className="eyebrow flex items-center gap-3"><span className="h-px w-9 bg-[#c6a873]" /> ExpertsEarn · Independent insight network</div>
-            <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-.055em] text-[#f3eee4] sm:text-6xl lg:text-[76px]">ExpertsEarn:<br /><span className="font-serif italic font-normal text-[#c9ad7d]">your insight has value.</span></h1>
+            <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-.055em] text-[#f3eee4] sm:text-6xl lg:text-[76px]">Paid online surveys<br /><span className="font-serif italic font-normal text-[#c9ad7d]">in Rwanda. Your insight has value.</span></h1>
             <p className="mt-7 max-w-xl text-[17px] leading-8 text-[#aaa6a2]">Discover paid online surveys in Rwanda and research studies from international teams. Share your perspective, help shape better products and services, and earn eligible rewards in Rwandan francs (RWF).</p>
             <div className="mt-9 flex flex-wrap gap-3"><Link href="/signup" className="metal-button">Join ExpertsEarn <MoveUpRight size={17} /></Link><Link href="/partners" className="ghost-button">Research partner access</Link></div>
             <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#77767c]"><span className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#c6a873]" /> Privacy-aware participation</span><span>English · Kinyarwanda · Français</span></div>
@@ -106,7 +106,7 @@ export default function HomePage() {
       </section>
 
       <footer className="container flex flex-col gap-6 py-9 text-xs text-[#77747a] sm:flex-row sm:items-center sm:justify-between">
-        <div><Brand /><p className="mt-3">© {new Date().getFullYear()} ExpertsEarn by ExpertsTeam · Created by Chris Programs.</p></div>
+        <div><Brand /><p className="mt-3">© {new Date().getFullYear()} ExpertsEarn by ExpertsTeam.</p></div>
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-6 gap-y-3">
           <Link href="/how-it-works">How it works</Link><Link href="/partners">For research teams</Link><Link href="/about">About us</Link><Link href="/contact">Contact us</Link><Link href="/privacy">Privacy policy</Link><Link href="/terms">Terms of service</Link>
         </nav>
