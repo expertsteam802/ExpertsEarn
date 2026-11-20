@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About ExpertsEarn",
+  title: "About ExpertsEarn | Survey Rewards Platform",
   description: "Learn about ExpertsEarn, a research participation and survey rewards platform built by ExpertsTeam, connecting people and organizations through responsible research.",
   alternates: { canonical: "/about" },
 };
