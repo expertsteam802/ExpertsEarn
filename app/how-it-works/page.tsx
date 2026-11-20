@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "How ExpertsEarn Works",
+  title: "How Paid Surveys Work | ExpertsEarn",
   description: "See how ExpertsEarn survey eligibility, honest participation, RWF rewards, wallet balances and payout requests work for members.",
   alternates: { canonical: "/how-it-works" },
 };
