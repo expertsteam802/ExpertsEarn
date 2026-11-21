@@ -11,6 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/admin",
           "/dashboard",
+          "/referrals",
           "/wallet",
           "/profile",
           "/surveys",
