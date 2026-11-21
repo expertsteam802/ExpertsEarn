@@ -29,9 +29,16 @@ export async function createPartnerSurvey(formData:FormData){
  const reward=Number(formData.get("reward_rwf")||0);
  const responseLimit=Number(formData.get("response_limit")||100);
  const price=Number(formData.get("partner_price_usd")||0.2);
- const {data:pricingSetting}=await admin.from("platform_settings").select("value").eq("key","survey_pricing_usd").maybeSingle();
+ const [{data:pricingSetting},{data:rateSetting},{data:splitSetting}]=await Promise.all([
+  admin.from("platform_settings").select("value").eq("key","survey_pricing_usd").maybeSingle(),
+  admin.from("platform_settings").select("value").eq("key","usd_to_rwf_rate").maybeSingle(),
+  admin.from("platform_settings").select("value").eq("key","revenue_splits").maybeSingle()
+ ]);
  const minPrice=Number(pricingSetting?.value?.min??0.2);
  const maxPrice=Number(pricingSetting?.value?.max??0.5);
+ const exchangeRate=Number(rateSetting?.value??0);
+ const respondentShare=Number(splitSetting?.value?.partner?.respondent??0);
+ const maxAffordableReward=exchangeRate>0?Math.floor(price*exchangeRate*respondentShare/100):0;
  const country=String(formData.get("target_country")||"").trim().toUpperCase();
  const targetGender=String(formData.get("target_gender")||"").trim()||null;
  const region=String(formData.get("target_region")||"").trim();
@@ -44,14 +51,14 @@ export async function createPartnerSurvey(formData:FormData){
  let questions:any[];
  try{questions=JSON.parse(String(formData.get("questions_json")||"[]"));}catch{redirect("/partners/dashboard?error=invalid_questions_json");}
  const allowed=new Set(["text","number","rating","yes_no","single_choice","multiple_choice"]);
- const validQuestions=Array.isArray(questions)&&questions.length>=1&&questions.length<=100&&questions.every(q=>{
+ const validQuestions=Array.isArray(questions)&&questions.length>=5&&questions.length<=10&&questions.every(q=>{
   if(!q||typeof q.prompt!=="string"||!q.prompt.trim()||q.prompt.length>2000||!allowed.has(q.type||"text"))return false;
   const type=q.type||"text";
   const options=Array.isArray(q.options)?q.options:[];
   if((type==="single_choice"||type==="multiple_choice")&&(options.length<2||options.length>30||!options.every((option:any)=>typeof option==="string"||(option&&typeof option.label==="string"&&typeof option.value==="string"))))return false;
   return true;
  });
- if(title.length<3||title.length>140||description.length>5000||!["en","rw","fr"].includes(language)||!Number.isSafeInteger(reward)||reward<0||reward>100000||!Number.isInteger(responseLimit)||responseLimit<1||responseLimit>100000||!Number.isFinite(price)||price<minPrice||price>maxPrice||!validQuestions||(targetGender!==null&&!["female","male","non_binary","prefer_not_to_say"].includes(targetGender))||(minAge!==null&&(!Number.isInteger(minAge)||minAge<13||minAge>100))||(maxAge!==null&&(!Number.isInteger(maxAge)||maxAge<13||maxAge>100))||(minAge!==null&&maxAge!==null&&minAge>maxAge)){
+ if(title.length<3||title.length>140||description.length>5000||!["en","rw","fr"].includes(language)||!Number.isSafeInteger(reward)||reward<0||reward>maxAffordableReward||!Number.isInteger(responseLimit)||responseLimit<1||responseLimit>100000||!Number.isFinite(price)||price<minPrice||price>maxPrice||!validQuestions||(targetGender!==null&&!["female","male","non_binary","prefer_not_to_say"].includes(targetGender))||(minAge!==null&&(!Number.isInteger(minAge)||minAge<13||minAge>100))||(maxAge!==null&&(!Number.isInteger(maxAge)||maxAge<13||maxAge>100))||(minAge!==null&&maxAge!==null&&minAge>maxAge)){
   redirect("/partners/dashboard?error=invalid_survey_details");
  }
  const normalized=questions.map((q:any)=>({prompt:q.prompt.trim(),type:q.type||"text",options:Array.isArray(q.options)?q.options:[],required:q.required!==false}));
