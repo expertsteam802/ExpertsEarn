@@ -5,6 +5,9 @@ import { createPartnerSurvey } from "@/app/partners/dashboard/actions";
 
 const starter = [
   { prompt: "How satisfied are you with the service?", type: "rating", options: [], required: true },
+  { prompt: "How often do you use this product or service?", type: "single_choice", options: ["Daily", "Weekly", "Monthly", "Rarely", "Never"], required: true },
+  { prompt: "How did you first hear about it?", type: "single_choice", options: ["Friends or family", "Social media", "Search engine", "Advertisement", "Other"], required: true },
+  { prompt: "What do you like most about your experience?", type: "text", options: [], required: true },
   { prompt: "What would you improve?", type: "text", options: [], required: false }
 ];
 
@@ -34,7 +37,7 @@ export function PartnerSurveyBuilder({minPrice=0.2,maxPrice=0.5}:{minPrice?:numb
       <label className="text-sm font-semibold">Minimum age<input name="min_age" type="number" min="13" max="100" placeholder="18" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold">Maximum age<input name="max_age" type="number" min="13" max="100" placeholder="65" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
       <label className="text-sm font-semibold sm:col-span-2">Questions (JSON)<textarea name="questions_json" required value={questions} onChange={event => setQuestions(event.target.value)} rows={8} spellCheck={false} className="mt-2 w-full rounded-xl border border-slate-200 p-3 font-mono text-xs leading-5" /></label>
-      <p className="text-xs leading-5 text-slate-500 sm:col-span-2">Each question needs a prompt and type: text, number, rating, yes_no, single_choice or multiple_choice. Choice questions use an options array. Up to 100 questions per survey.</p>
+      <p className="text-xs leading-5 text-slate-500 sm:col-span-2">Each question needs a prompt and type: text, number, rating, yes_no, single_choice or multiple_choice. Choice questions use an options array. Use between 5 and 10 questions. Rewards must fit the funded respondent share; your survey is only published after admin review and the partner credit is reserved.</p>
       <button className="min-h-12 rounded-xl bg-forest px-5 py-3 font-bold text-white sm:col-span-2">Create draft for review</button>
     </form>
   </section>;

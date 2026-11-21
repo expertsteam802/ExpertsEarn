@@ -18,6 +18,10 @@ export async function GET(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: "Could not retrieve billing history" }, { status: 500 });
   const entries = data || [];
-  const ledgerTotal = entries.reduce((total, entry) => total + Number(entry.amount_usd || 0), 0);
+  // This is the credit movement total. response_charge rows report consumption
+  // against already-reserved budgets and must not be deducted a second time.
+  const ledgerTotal = entries
+    .filter(entry => ["credit_topup", "budget_reserve", "budget_release"].includes(entry.event_type))
+    .reduce((total, entry) => total + Number(entry.amount_usd || 0), 0);
   return NextResponse.json({ data: entries, count: entries.length, ledger_total_usd: Number(ledgerTotal.toFixed(2)) });
 }

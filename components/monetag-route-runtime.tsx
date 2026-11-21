@@ -17,8 +17,8 @@ function isExcluded(pathname: string) {
   return EXCLUDED_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"));
 }
 
-const IN_PAGE_LOADER = "(function(s){s.dataset.zone='12294866',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))";
-const VIGNETTE_LOADER = "(function(s){s.dataset.zone='12294868',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))";
+const IN_PAGE_LOADER = "(function(s){s.dataset.zone='12296064',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))";
+const VIGNETTE_LOADER = "(function(s){s.dataset.zone='12296060',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))";
 
 function ensureLoader(id: string, source: string) {
   if (document.getElementById(id)) return;

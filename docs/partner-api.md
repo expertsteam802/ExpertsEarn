@@ -7,7 +7,7 @@ Authenticate every request with `x-api-key: YOUR_PARTNER_API_KEY` (or `Authoriza
 ## Endpoints
 
 - `GET /surveys` — list your surveys and response counts.
-- `POST /surveys` — create a survey as a draft. Provide `title`, `questions` (1–100), and optional audience, language, reward and pricing fields.
+- `POST /surveys` — create a survey as a draft. Provide `title`, `questions` (5–10), a finite `response_limit`, and optional audience, language, reward and pricing fields.
 - `GET /surveys/{id}` — retrieve status and targeting for one of your surveys.
 - `GET /surveys/{id}/responses` — retrieve submitted responses as JSON.
 - `GET /surveys/{id}/responses?format=csv` — download a CSV export.
@@ -15,7 +15,7 @@ Authenticate every request with `x-api-key: YOUR_PARTNER_API_KEY` (or `Authoriza
 
 ## Survey pricing and audience
 
-Price per completed response must be between **$0.20 and $0.50**. The default is $0.20.
+Price per completed response must be within the admin-configured range (currently **$0.20–$0.50**). Every partner survey needs a fixed response limit. Before publication, the platform reserves the full remaining response budget from your prepaid partner credit. If the survey is paused, unused reserved credit is returned. Respondent rewards cannot exceed the configured respondent share of the response price after the admin USD/RWF conversion rate is applied.
 
 Targeting fields:
 - Global: `target_country`, `target_region`, `target_city`
