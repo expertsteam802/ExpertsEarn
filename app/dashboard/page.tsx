@@ -33,5 +33,5 @@ export default async function DashboardPage(){
   return true;
  }).map(s=>({...s,question_count:s.question_count||0,reward_ec:Number(s.reward_rwf||0)*ecRate}));
  const accountRestricted = profile?.account_status === "suspended" || (profile?.account_status === "locked" && (!profile?.account_locked_until || new Date(profile.account_locked_until).getTime() > Date.now()));
- return <DashboardShell accountRestricted={accountRestricted} restrictionReason={profile?.account_status_reason||""} name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balanceEc={Number(wallet?.balance_ec??wallet?.balance_rwf??0)} lifetimeEc={Number(wallet?.lifetime_earned_ec??wallet?.lifetime_earned_rwf??0)} surveys={accountRestricted?[]:eligible as any}/>;
+ return <DashboardShell emailVerified={Boolean(user.email_confirmed_at)} accountRestricted={accountRestricted} restrictionReason={profile?.account_status_reason||""} name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balanceEc={Number(wallet?.balance_ec??wallet?.balance_rwf??0)} lifetimeEc={Number(wallet?.lifetime_earned_ec??wallet?.lifetime_earned_rwf??0)} surveys={accountRestricted?[]:eligible as any}/>;
 }
