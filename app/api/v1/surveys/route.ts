@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   const maxPrice = Number(pricingSetting?.value?.max ?? 0.5);
   const price = body.partner_price_usd === undefined ? minPrice : Number(body.partner_price_usd);
   if (!Number.isFinite(minPrice) || !Number.isFinite(maxPrice) || minPrice < 0 || maxPrice < minPrice ||
-      !Number.isFinite(price) || price < minPrice || price > maxPrice) {
+      !Number.isFinite(price) || Math.abs(price * 100 - Math.round(price * 100)) > 1e-8 || price < minPrice || price > maxPrice) {
     return NextResponse.json({ error: `Price per completed response must be between ${minPrice.toFixed(2)} and ${maxPrice.toFixed(2)}.` }, { status: 400 });
   }
 
