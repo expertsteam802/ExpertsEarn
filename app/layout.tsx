@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     title: "Online Surveys & Rewards Worldwide | ExpertsEarn",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
-    locale: "en_RW",
+    locale: "en",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Online Surveys & Rewards in Rwanda | ExpertsEarn",
+    title: "Online Surveys & Rewards Worldwide | ExpertsEarn",
     description: SITE_DESCRIPTION,
   },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
