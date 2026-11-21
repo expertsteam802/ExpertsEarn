@@ -9,7 +9,7 @@ const nav=[["overview","Overview"],["users","Users"],["money","Money"],["partner
 export default async function AdminPage({searchParams}:{searchParams:Promise<{error?:string;updated?:string;partner_approved?:string;survey_updated?:string;user_updated?:string;settings_saved?:string;credit_added?:string;tab?:string;setting?:string}>}){
  const query=await searchParams;
  const activeTab = ["overview","users","money","partners","surveys","payouts","settings"].includes(query.tab||"") ? query.tab! : "overview";
- const settingTabs = [["daily_survey_cap","Survey limits"],["minimum_payout_rwf","Payout rules"],["revenue_splits","Revenue split"],["survey_pricing_usd","Partner pricing"],["supported_languages","Languages"],["public_branding","Branding"]];
+ const settingTabs = [["daily_survey_cap","Survey limits"],["minimum_payout_rwf","Payout rules"],["revenue_splits","Revenue split"],["survey_pricing_usd","Partner pricing"],["supported_languages","Languages"],["referral_reward_ec","Referral rewards"],["public_branding","Branding"]];
  const activeSetting = settingTabs.some(([key])=>key===query.setting) ? query.setting : "daily_survey_cap";
  const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();if(profile?.role!=="admin")redirect("/dashboard");
