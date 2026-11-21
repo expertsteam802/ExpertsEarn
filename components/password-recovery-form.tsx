@@ -20,7 +20,7 @@ export function PasswordRecoveryForm({ mode }: { mode: "request" | "update" }) {
     setMessage("");
     setError("");
     const result = mode === "request"
-      ? await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?next=/reset-password` })
+      ? await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` })
       : await supabase.auth.updateUser({ password });
     setBusy(false);
     if (result.error) {
