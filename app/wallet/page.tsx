@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Wallet as WalletIcon, ArrowLeft } from "lucide-react";
+import { AdFirstClickLink } from "@/components/ad-first-click-link";
 
 export default async function WalletPage({ searchParams }: { searchParams: Promise<{ payout?: string }> }) {
   const query = await searchParams;
@@ -26,7 +27,7 @@ export default async function WalletPage({ searchParams }: { searchParams: Promi
         <div><p className="text-xs text-emerald-100">Lifetime paid</p><p className="mt-1 font-bold">{Number(wallet?.lifetime_paid_ec ?? wallet?.lifetime_paid_rwf ?? 0).toLocaleString(undefined,{maximumFractionDigits:2})} EC</p></div>
       </div>
     </div>
-    <div className="mt-8 flex flex-wrap items-center justify-between gap-3"><h1 className="text-xl font-black text-slate-950">Transaction history</h1><Link href="/wallet/payout" className="rounded-xl bg-forest px-4 py-2.5 text-sm font-bold text-white">Request payout</Link></div>
+    <div className="mt-8 flex flex-wrap items-center justify-between gap-3"><h1 className="text-xl font-black text-slate-950">Transaction history</h1><AdFirstClickLink href="/wallet/payout" className="rounded-xl bg-forest px-4 py-2.5 text-sm font-bold text-white" label="Request payout">Request payout</AdFirstClickLink></div>
     <div className="surface mt-4 divide-y divide-slate-100">
       {(tx ?? []).map(t => <div key={t.id} className="flex items-center justify-between gap-3 p-4"><div><p className="font-bold text-slate-800">{t.description || t.transaction_type}</p><p className="mt-1 text-xs text-slate-400">{new Date(t.created_at).toLocaleString()}</p></div><span className={t.amount_rwf >= 0 ? "font-extrabold text-emerald-700" : "font-extrabold text-rose-600"}>{t.amount_ec > 0 ? "+" : ""}{Number(t.amount_ec ?? t.amount_rwf).toLocaleString(undefined,{maximumFractionDigits:2})} EC</span><p className="mt-1 text-right text-[11px] text-slate-400">{t.amount_rwf>0?"+":""}{t.amount_rwf.toLocaleString()} RWF protected value</p></div>)}
       {(!tx || tx.length === 0) && <p className="p-6 text-sm text-slate-500">Your verified survey ExpertsCoins will appear here.</p>}
