@@ -6,7 +6,7 @@ import {Brand} from "@/components/brand";
 import {House,ClipboardList,Wallet,Medal,UserRound,Shield,ArrowUpRight,Clock3,Search,LogOut,ChartNoAxesCombined} from "lucide-react";
 
 type Survey={id:string;title:string;description:string|null;reward_rwf:number;reward_ec:number;question_count:number;language:string};
-type Props={name:string;avatarUrl:string;email:string;role:string;balanceEc:number;lifetimeEc:number;ecRate:number;surveys:Survey[]};
+type Props={name:string;avatarUrl:string;email:string;role:string;balanceEc:number;lifetimeEc:number;surveys:Survey[]};
 const tabs=[{id:"home",label:"Overview",icon:House},{id:"surveys",label:"Discover",icon:ClipboardList},{id:"wallet",label:"Wallet",icon:Wallet},{id:"ranks",label:"Ranks",icon:Medal},{id:"profile",label:"Profile",icon:UserRound}];
 export function DashboardShell({name,avatarUrl,email,role,balanceEc,lifetimeEc,surveys}:Props){
  const [tab,setTab]=useState("home");const [selected,setSelected]=useState<Survey|null>(null);
