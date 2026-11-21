@@ -1,199 +1,58 @@
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
-
-type AuthEmailEvent = {
-  user: {
-    id: string;
-    email?: string;
-    new_email?: string;
-    user_metadata?: { display_name?: string; full_name?: string };
-  };
-  email_data: {
-    token?: string;
-    token_hash?: string;
-    redirect_to?: string;
-    email_action_type: string;
-    site_url?: string;
-    token_new?: string;
-    token_hash_new?: string;
-    old_email?: string;
-  };
-};
-
-const EMAILJS_ENDPOINT = "https://api.emailjs.com/api/v1.0/email/send";
+type Event = { user: { email?: string; new_email?: string; user_metadata?: { display_name?: string; full_name?: string } }; email_data: { token?: string; token_hash?: string; token_new?: string; token_hash_new?: string; redirect_to?: string; email_action_type: string } };
 const APP_URL = Deno.env.get("APP_URL") ?? "https://www.expertsearn.mywire.org";
-const SUPPORT_EMAIL = "expertsearn@gmail.com";
-
-function requiredEnv(name: string): string {
-  const value = Deno.env.get(name)?.trim();
-  if (!value) throw new Error(`Missing required secret: ${name}`);
-  return value;
+const FROM = "ExpertsEarn";
+const SUPPORT = "expertsearn@gmail.com";
+const templates: Record<string, [string,string,string]> = {
+ signup:["Confirm your ExpertsEarn account","Welcome to ExpertsEarn","Confirm your email address to activate your account."],
+ invite:["Your ExpertsEarn invitation","You're invited to ExpertsEarn","Accept your invitation and join ExpertsEarn."],
+ magiclink:["Your ExpertsEarn sign-in link","Sign in to ExpertsEarn","Use the secure link below to sign in."],
+ recovery:["Reset your ExpertsEarn password","Password reset requested","Use the secure link below to reset your password. If you did not request this, ignore this email."],
+ email:["Confirm your email address","Confirm your email","Use the secure link below to confirm your email address."],
+ email_change:["Confirm your ExpertsEarn email change","Confirm your email change","A request was made to change your account email. Use the secure link below."],
+ reauthentication:["Verify your ExpertsEarn account","Confirm it's you","Use the one-time code below to continue."],
+ password_changed_notification:["Your ExpertsEarn password was changed","Password changed","Your account password was changed. If this wasn't you, contact support."],
+ email_changed_notification:["Your ExpertsEarn email was changed","Email address changed","Your account email address was changed. If this wasn't you, contact support."]
+};
+function env(k:string){const v=Deno.env.get(k)?.trim();if(!v)throw new Error("Missing secret "+k);return v;}
+function esc(s:string){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]!));}
+function redirect(raw?:string){const base=new URL(APP_URL);if(!raw)return base.toString();try{const u=new URL(raw);return [base.origin,"https://expertsearn.mywire.org"].includes(u.origin)?u.toString():base.toString();}catch{return base.toString();}}
+function verifyUrl(hash:string,type:string,red:string){const u=new URL(env("SUPABASE_URL").replace(/\/$/,"")+"/auth/v1/verify");u.searchParams.set("token",hash);u.searchParams.set("type",type);u.searchParams.set("redirect_to",red);return u.toString();}
+async function send(to:string,name:string,action:string,href:string,token?:string){
+ const [subject,title,body]=templates[action]??["ExpertsEarn account update","Account update","There has been an update to your ExpertsEarn account."];
+ const key=env("MAILJET_API_KEY"),secret=env("MAILJET_SECRET_KEY"),from=env("MAILJET_FROM_EMAIL");
+ const link=esc(href), safeName=esc(name), safeToken=token?esc(token):"";
+ const html=`<!doctype html><html><body style="font-family:Arial,sans-serif;background:#f1f5f9;padding:24px;color:#0f172a"><main style="max-width:560px;margin:auto;background:#fff;padding:32px;border-radius:14px"><h2 style="color:#2563eb">ExpertsEarn</h2><h1>${esc(title)}</h1><p>Hello ${safeName},</p><p>${esc(body)}</p><p><a style="display:inline-block;background:#2563eb;color:#fff;padding:13px 20px;border-radius:8px;text-decoration:none" href="${link}">Continue securely</a></p>${safeToken?`<p>Your verification code: <strong>${safeToken}</strong></p>`:""}<p style="color:#64748b;font-size:13px">If you did not request this, ignore this message. Support: ${SUPPORT}</p></main></body></html>`;
+ const text=`Hello ${name},\n\n${body}\n\n${href}${token?"\nVerification code: "+token:""}\n\nExpertsEarn Support: ${SUPPORT}`;
+ const res=await fetch("https://api.mailjet.com/v3.1/send",{method:"POST",headers:{"Authorization":"Basic "+btoa(key+":"+secret),"Content-Type":"application/json"},body:JSON.stringify({Messages:[{From:{Email:from,Name:FROM},To:[{Email:to,Name:name}],Subject:subject,TextPart:text,HTMLPart:html}] }),signal:AbortSignal.timeout(15000)});
+ const data=await res.json().catch(()=>({}));
+ if(!res.ok||data?.Messages?.[0]?.Status!=="success"){console.error("Mailjet error",res.status,JSON.stringify(data).slice(0,500));throw new Error("Mailjet rejected email, HTTP "+res.status);}
 }
-
-function safeName(value: unknown): string {
-  if (typeof value !== "string") return "there";
-  const clean = value.replace(/[<>\r\n]/g, "").trim().slice(0, 80);
-  return clean || "there";
-}
-
-function allowedRedirect(raw: string | undefined): string {
-  const fallback = new URL(APP_URL);
-  if (!raw) return fallback.toString();
-  try {
-    const candidate = new URL(raw);
-    const allowed = new Set([fallback.origin, "https://expertsearn.mywire.org"]);
-    if (!allowed.has(candidate.origin)) return fallback.toString();
-    return candidate.toString();
-  } catch {
-    return fallback.toString();
+Deno.serve(async req=>{
+ if(req.method!=="POST")return new Response("Method not allowed",{status:405});
+ try{
+  const secret=env("SEND_EMAIL_HOOK_SECRET").replace(/^v1,whsec_/,"");
+  const event=new Webhook(secret).verify(await req.text(),Object.fromEntries(req.headers)) as Event;
+  const action=event.email_data?.email_action_type,email=event.user?.email?.trim();
+  if(!action||!email)throw new Error("Invalid Supabase Auth Hook payload");
+  const name=(event.user.user_metadata?.display_name??event.user.user_metadata?.full_name??"there").replace(/[<>\r\n]/g,"").slice(0,80)||"there";
+  const red=redirect(event.email_data.redirect_to),d=event.email_data;
+  if(action==="email_change"){
+   const newEmail=event.user.new_email?.trim();
+   if(d.token_hash_new&&d.token_hash&&d.token&&d.token_new&&newEmail){
+    await send(email,name,action,verifyUrl(d.token_hash_new,action,red),d.token);
+    await new Promise(r=>setTimeout(r,1100));
+    await send(newEmail,name,action,verifyUrl(d.token_hash,action,red),d.token_new);
+   }else{
+    const hash=d.token_hash??d.token_hash_new;if(!hash)throw new Error("Email-change token hash missing");
+    await send(newEmail??email,name,action,verifyUrl(hash,action,red),d.token??d.token_new);
+   }
+  }else{
+   const tokenTypes=new Set(["signup","invite","magiclink","recovery","email","reauthentication"]);
+   const hash=d.token_hash;
+   if(tokenTypes.has(action)&&!hash)throw new Error("Auth token hash missing");
+   await send(email,name,action,tokenTypes.has(action)?verifyUrl(hash!,action,red):APP_URL,d.token);
   }
-}
-
-function verificationUrl(tokenHash: string, actionType: string, redirectTo: string): string {
-  const supabaseUrl = requiredEnv("SUPABASE_URL").replace(/\/$/, "");
-  const url = new URL(`${supabaseUrl}/auth/v1/verify`);
-  url.searchParams.set("token", tokenHash);
-  url.searchParams.set("type", actionType);
-  url.searchParams.set("redirect_to", redirectTo);
-  return url.toString();
-}
-
-function copyFor(action: string): { subject: string; headline: string; message: string; button: string } {
-  const copy: Record<string, { subject: string; headline: string; message: string; button: string }> = {
-    signup: { subject: "Confirm your ExpertsEarn account", headline: "Welcome to ExpertsEarn", message: "Confirm your email address to activate your ExpertsEarn account and get started.", button: "Confirm my email" },
-    invite: { subject: "You are invited to ExpertsEarn", headline: "Your ExpertsEarn invitation", message: "You have been invited to join ExpertsEarn. Confirm your email to continue.", button: "Accept invitation" },
-    magiclink: { subject: "Your ExpertsEarn sign-in link", headline: "Sign in to ExpertsEarn", message: "Use the secure link below to sign in to your account.", button: "Sign in securely" },
-    recovery: { subject: "Reset your ExpertsEarn password", headline: "Password reset requested", message: "We received a request to reset your ExpertsEarn password. If you made this request, use the secure link below. If not, you can ignore this email.", button: "Reset my password" },
-    email: { subject: "Confirm your email address", headline: "Confirm your email", message: "Use the secure link below to confirm this email address for your ExpertsEarn account.", button: "Confirm email" },
-    email_change: { subject: "Confirm your ExpertsEarn email change", headline: "Confirm your email change", message: "A request was made to change the email address on your ExpertsEarn account. Use the secure link below to approve it.", button: "Confirm email change" },
-    reauthentication: { subject: "Verify your ExpertsEarn account", headline: "Confirm it's you", message: "Enter the verification code shown below to continue with this sensitive account action.", button: "Open ExpertsEarn" },
-    password_changed_notification: { subject: "Your ExpertsEarn password was changed", headline: "Password changed", message: "The password for your ExpertsEarn account was changed. If you did not make this change, contact our support team immediately.", button: "Visit ExpertsEarn" },
-    email_changed_notification: { subject: "Your ExpertsEarn email was changed", headline: "Email address changed", message: "The email address associated with your ExpertsEarn account was changed. If you did not make this change, contact our support team immediately.", button: "Visit ExpertsEarn" },
-    phone_changed_notification: { subject: "Your ExpertsEarn phone number was changed", headline: "Phone number changed", message: "The phone number associated with your ExpertsEarn account was changed. If you did not make this change, contact our support team.", button: "Visit ExpertsEarn" },
-    identity_linked_notification: { subject: "A sign-in method was linked to ExpertsEarn", headline: "Sign-in method linked", message: "A new sign-in identity was linked to your ExpertsEarn account. If you did not do this, secure your account and contact support.", button: "Visit ExpertsEarn" },
-    identity_unlinked_notification: { subject: "A sign-in method was removed from ExpertsEarn", headline: "Sign-in method removed", message: "A sign-in identity was removed from your ExpertsEarn account. If you did not do this, secure your account and contact support.", button: "Visit ExpertsEarn" },
-    mfa_factor_enrolled_notification: { subject: "Two-factor authentication enabled", headline: "Two-factor authentication enabled", message: "A two-factor authentication method was added to your ExpertsEarn account. If you did not do this, contact support.", button: "Visit ExpertsEarn" },
-    mfa_factor_unenrolled_notification: { subject: "Two-factor authentication changed", headline: "Two-factor authentication method removed", message: "A two-factor authentication method was removed from your ExpertsEarn account. If you did not do this, contact support.", button: "Visit ExpertsEarn" },
-  };
-  return copy[action] ?? { subject: "An account update from ExpertsEarn", headline: "Account update", message: "There has been an update to your ExpertsEarn account. If you do not recognize this activity, contact support.", button: "Visit ExpertsEarn" };
-}
-
-async function sendEmail(params: {
-  toEmail: string;
-  toName: string;
-  action: string;
-  token?: string;
-  actionUrl?: string;
-}) {
-  const serviceId = requiredEnv("EMAILJS_SERVICE_ID");
-  const templateId = requiredEnv("EMAILJS_TEMPLATE_ID");
-  const publicKey = requiredEnv("EMAILJS_PUBLIC_KEY");
-  const privateKey = requiredEnv("EMAILJS_PRIVATE_KEY");
-  const copy = copyFor(params.action);
-  const templateParams = {
-    to_email: params.toEmail,
-    to_name: params.toName,
-    subject: copy.subject,
-    headline: copy.headline,
-    message: copy.message,
-    action_url: params.actionUrl ?? APP_URL,
-    action_label: copy.button,
-    verification_code: params.action === "reauthentication" ? (params.token ?? "") : "",
-    support_email: SUPPORT_EMAIL,
-    website_url: APP_URL,
-    year: String(new Date().getUTCFullYear()),
-  };
-
-  const response = await fetch(EMAILJS_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      service_id: serviceId,
-      template_id: templateId,
-      user_id: publicKey,
-      accessToken: privateKey,
-      template_params: templateParams,
-    }),
-    signal: AbortSignal.timeout(12_000),
-  });
-
-  if (!response.ok) {
-    const detail = (await response.text()).slice(0, 300);
-    console.error("EmailJS delivery failed", { status: response.status, detail });
-    throw new Error(`Email provider rejected the message (HTTP ${response.status})`);
-  }
-}
-
-Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
-
-  try {
-    const hookSecret = requiredEnv("SEND_EMAIL_HOOK_SECRET").replace(/^v1,whsec_/, "");
-    const payload = await req.text();
-    const headers = Object.fromEntries(req.headers);
-    const webhook = new Webhook(hookSecret);
-    const event = webhook.verify(payload, headers) as AuthEmailEvent;
-
-    const email = event.user?.email?.trim();
-    const action = event.email_data?.email_action_type;
-    if (!email || !action) throw new Error("Auth hook payload is missing required fields");
-
-    const displayName = safeName(event.user.user_metadata?.display_name ?? event.user.user_metadata?.full_name);
-    const redirectTo = allowedRedirect(event.email_data.redirect_to);
-    const data = event.email_data;
-
-    if (action === "email_change") {
-      const currentEmail = email;
-      const newEmail = event.user.new_email?.trim();
-      if (data.token_hash_new && data.token && data.token_hash && data.token_new && newEmail) {
-        await sendEmail({
-          toEmail: currentEmail,
-          toName: displayName,
-          action,
-          token: data.token,
-          actionUrl: verificationUrl(data.token_hash_new, action, redirectTo),
-        });
-        await new Promise((resolve) => setTimeout(resolve, 1100));
-        await sendEmail({
-          toEmail: newEmail,
-          toName: displayName,
-          action,
-          token: data.token_new,
-          actionUrl: verificationUrl(data.token_hash, action, redirectTo),
-        });
-      } else {
-        const target = newEmail ?? currentEmail;
-        const hash = data.token_hash ?? data.token_hash_new;
-        if (!hash) throw new Error("Email-change verification hash is missing");
-        await sendEmail({
-          toEmail: target,
-          toName: displayName,
-          action,
-          token: data.token ?? data.token_new,
-          actionUrl: verificationUrl(hash, action, redirectTo),
-        });
-      }
-    } else {
-      const tokenActions = new Set(["signup", "invite", "magiclink", "recovery", "email", "reauthentication"]);
-      const hash = data.token_hash;
-      const actionUrl = tokenActions.has(action)
-        ? (hash ? verificationUrl(hash, action, redirectTo) : undefined)
-        : APP_URL;
-      if (tokenActions.has(action) && !hash) throw new Error("Authentication verification hash is missing");
-      await sendEmail({
-        toEmail: email,
-        toName: displayName,
-        action,
-        token: data.token,
-        actionUrl,
-      });
-    }
-
-    return new Response(null, { status: 200 });
-  } catch (error) {
-    console.error("ExpertsEarn auth email hook failed", error instanceof Error ? error.message : "Unknown error");
-    return new Response(JSON.stringify({ error: { message: "Authentication email could not be delivered" } }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  return new Response(null,{status:200});
+ }catch(e){console.error("ExpertsEarn auth email hook error",e instanceof Error?e.message:"unknown");return new Response(JSON.stringify({error:{message:"Authentication email could not be delivered"}}),{status:500,headers:{"Content-Type":"application/json"}});}
 });
