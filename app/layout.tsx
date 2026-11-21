@@ -4,7 +4,7 @@ import { PwaRegister } from "@/components/pwa-register";
 import { NotificationOptIn } from "@/components/notification-opt-in";
 import "./globals.css";
 
-const SITE_URL = "https://expertsearn.mywire.org";
+const SITE_URL = "https://www.expertsearn.mywire.org";
 const SITE_NAME = "ExpertsEarn";
 const SITE_DESCRIPTION =
   "ExpertsEarn is an online survey and research rewards platform for Rwanda and supported markets. Discover eligible paid surveys, share your opinions and track approved rewards in Rwandan francs (RWF).";
@@ -43,10 +43,10 @@ const organizationSchema = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://expertsearn.mywire.org/#organization",
+      "@id": "https://www.expertsearn.mywire.org/#organization",
       name: "ExpertsEarn",
       alternateName: ["Experts Earn", "ExpertsEarn by ExpertsTeam"],
-      url: "https://expertsearn.mywire.org/",
+      url: "https://www.expertsearn.mywire.org/",
       email: "mucyochristhecla@gmail.com",
       parentOrganization: { "@type": "Organization", name: "ExpertsTeam" },
       description: SITE_DESCRIPTION,
@@ -56,12 +56,12 @@ const organizationSchema = {
     },
     {
       "@type": "WebSite",
-      "@id": "https://expertsearn.mywire.org/#website",
-      url: "https://expertsearn.mywire.org/",
+      "@id": "https://www.expertsearn.mywire.org/#website",
+      url: "https://www.expertsearn.mywire.org/",
       name: "ExpertsEarn",
       alternateName: "ExpertsEarn by ExpertsTeam",
       inLanguage: ["en", "rw", "fr"],
-      publisher: { "@id": "https://expertsearn.mywire.org/#organization" },
+      publisher: { "@id": "https://www.expertsearn.mywire.org/#organization" },
     },
   ],
 };
