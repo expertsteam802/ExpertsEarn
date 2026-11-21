@@ -1,14 +1,15 @@
 "use client";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import Link from "next/link";
 import {startSurvey} from "@/app/surveys/actions";
 import {Brand} from "@/components/brand";
 import {House,ClipboardList,Wallet,Medal,UserRound,Shield,ArrowUpRight,Clock3,Search,LogOut,ChartNoAxesCombined} from "lucide-react";
 
 type Survey={id:string;title:string;description:string|null;reward_rwf:number;reward_ec:number;question_count:number;language:string};
-type Props={name:string;avatarUrl:string;email:string;role:string;balanceEc:number;lifetimeEc:number;surveys:Survey[]};
+type Props={accountRestricted:boolean;restrictionReason:string;name:string;avatarUrl:string;email:string;role:string;balanceEc:number;lifetimeEc:number;surveys:Survey[]};
 const tabs=[{id:"home",label:"Overview",icon:House},{id:"surveys",label:"Discover",icon:ClipboardList},{id:"wallet",label:"Wallet",icon:Wallet},{id:"ranks",label:"Ranks",icon:Medal},{id:"profile",label:"Profile",icon:UserRound}];
-export function DashboardShell({name,avatarUrl,email,role,balanceEc,lifetimeEc,surveys}:Props){
+export function DashboardShell({accountRestricted,restrictionReason,name,avatarUrl,email,role,balanceEc,lifetimeEc,surveys}:Props){
+ useEffect(()=>{fetch("/api/security/check",{method:"POST",credentials:"same-origin"}).catch(()=>{});},[]);
  const [tab,setTab]=useState("home");const [selected,setSelected]=useState<Survey|null>(null);
  const current=tabs.find(t=>t.id===tab);
  return <main className="min-h-screen bg-[#090a0f] text-[#f2ecdf]">
