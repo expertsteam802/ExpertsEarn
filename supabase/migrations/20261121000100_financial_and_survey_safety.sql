@@ -96,12 +96,18 @@ begin
           raise exception 'Insufficient partner credit. Add funds before publishing this survey. Required: $%',to_char(v_budget,'FM999999990.00');
         end if;
         update public.surveys set reserved_budget_usd=v_budget where id=p_survey_id;
+        insert into public.partner_billing(partner_id,survey_id,event_type,amount_usd,currency,description)
+        values((select id from public.partner_accounts where user_id=v_survey.partner_id),p_survey_id,
+          'budget_reserve',-v_budget,'USD','Reserved prepaid budget for the remaining survey response cap');
       end if;
     end if;
   elsif v_survey.partner_id is not null and coalesce(v_survey.reserved_budget_usd,0)>0 then
     update public.partner_accounts
       set credit_usd=credit_usd+v_survey.reserved_budget_usd
       where user_id=v_survey.partner_id;
+    insert into public.partner_billing(partner_id,survey_id,event_type,amount_usd,currency,description)
+      values((select id from public.partner_accounts where user_id=v_survey.partner_id),p_survey_id,
+        'budget_release',v_survey.reserved_budget_usd,'USD','Released unused reserved survey budget');
     update public.surveys set reserved_budget_usd=0 where id=p_survey_id;
   end if;
 
