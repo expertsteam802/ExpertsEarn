@@ -54,6 +54,9 @@ begin
         from public.platform_settings where key='usd_to_rwf_rate';
       select coalesce((value->'partner'->>'respondent')::numeric,0) into v_respondent_share
         from public.platform_settings where key='revenue_splits';
+      if coalesce(v_survey.reward_rwf,0)<=0 then
+        raise exception 'Partner surveys must offer a positive respondent reward';
+      end if;
       if coalesce(v_survey.reward_rwf,0)>0 then
         if coalesce(v_rate,0)<=0 then
           raise exception 'Configure the USD to RWF rate before publishing surveys with respondent rewards';
