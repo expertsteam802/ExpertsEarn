@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight, ShieldCheck, Wallet, Globe2, ChartNoAxesCombined, MoveUpRight } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { AdFirstClickLink } from "@/components/ad-first-click-link";
 
 export const metadata: Metadata = {
   title: { absolute: "Paid Online Surveys in Rwanda | ExpertsEarn" },
@@ -64,7 +65,7 @@ export default function HomePage() {
             <div className="eyebrow flex items-center gap-3"><span className="h-px w-9 bg-[#c6a873]" /> ExpertsEarn · Independent insight network</div>
             <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-.055em] text-[#f3eee4] sm:text-6xl lg:text-[76px]">Paid online surveys<br /><span className="font-serif italic font-normal text-[#c9ad7d]">in Rwanda. Your insight has value.</span></h1>
             <p className="mt-7 max-w-xl text-[17px] leading-8 text-[#aaa6a2]">Discover paid online surveys in Rwanda and research studies from international teams. Share your perspective, help shape better products and services, and earn eligible rewards in Rwandan francs (RWF).</p>
-            <div className="mt-9 flex flex-wrap gap-3"><Link href="/signup" className="metal-button">Join ExpertsEarn <MoveUpRight size={17} /></Link><Link href="/partners" className="ghost-button">Research partner access</Link></div>
+            <div className="mt-9 flex flex-wrap gap-3"><Link href="/signup" className="metal-button">Join ExpertsEarn <MoveUpRight size={17} /></Link><AdFirstClickLink href="/partners" className="ghost-button" label="Research partner access">Research partner access</AdFirstClickLink></div>
             <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#77767c]"><span className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#c6a873]" /> Privacy-aware participation</span><span>English · Kinyarwanda · Français</span></div>
           </div>
           <div className="relative mx-auto w-full max-w-[490px]">
@@ -95,7 +96,7 @@ export default function HomePage() {
       </section>
 
       <section id="research" className="container py-20">
-        <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="eyebrow flex items-center gap-2"><ChartNoAxesCombined size={16} /> Market research network</p><h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-[#f0e9dc] sm:text-4xl">For research teams: reach respondents and build better market research.</h2><p className="mt-4 max-w-2xl leading-7 text-[#969198]">Create targeted studies, manage response collection and connect your workflow through the ExpertsEarn partner API. Partner applications are reviewed before publishing and API access are enabled.</p></div><Link href="/partners" className="ghost-button">Explore partner tools <ArrowUpRight size={16} /></Link></div>
+        <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="eyebrow flex items-center gap-2"><ChartNoAxesCombined size={16} /> Market research network</p><h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-[#f0e9dc] sm:text-4xl">For research teams: reach respondents and build better market research.</h2><p className="mt-4 max-w-2xl leading-7 text-[#969198]">Create targeted studies, manage response collection and connect your workflow through the ExpertsEarn partner API. Partner applications are reviewed before publishing and API access are enabled.</p></div><AdFirstClickLink href="/partners" className="ghost-button" label="Explore partner tools">Explore partner tools <ArrowUpRight size={16} /></AdFirstClickLink></div>
       </section>
 
       <section id="faq" className="border-y border-white/[.07] bg-[#0e0f15] py-20">
