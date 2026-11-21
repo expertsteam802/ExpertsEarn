@@ -232,3 +232,172 @@ $function$;
 
 revoke all on function public.request_payout(bigint,text,text) from public,anon;
 grant execute on function public.request_payout(bigint,text,text) to authenticated;
+
+
+create or replace function public.admin_update_survey_terms(
+  p_survey_id uuid,
+  p_reward_rwf integer,
+  p_response_limit integer default null
+)
+returns void language plpgsql security definer set search_path=public
+as $function$
+declare
+  v_survey public.surveys%rowtype;
+  v_rate numeric;
+  v_respondent_share numeric;
+begin
+  if auth.uid() is null or not public.is_admin() then raise exception 'Admin access required'; end if;
+  if p_reward_rwf is null or p_reward_rwf<0 or p_reward_rwf>1000000 then
+    raise exception 'Reward must be between 0 and 1,000,000 RWF';
+  end if;
+  if p_response_limit is not null and (p_response_limit<1 or p_response_limit>1000000) then
+    raise exception 'Response limit must be between 1 and 1,000,000';
+  end if;
+  select * into v_survey from public.surveys where id=p_survey_id for update;
+  if not found or v_survey.status not in ('draft','paused') then
+    raise exception 'Only draft or paused surveys can be edited';
+  end if;
+  if v_survey.partner_id is not null then
+    if p_response_limit is null then raise exception 'Partner surveys require a fixed response limit'; end if;
+    select coalesce((value #>> '{}')::numeric,0) into v_rate
+      from public.platform_settings where key='usd_to_rwf_rate';
+    select coalesce((value->'partner'->>'respondent')::numeric,0) into v_respondent_share
+      from public.platform_settings where key='revenue_splits';
+    if p_reward_rwf>0 and (
+      coalesce(v_rate,0)<=0 or
+      p_reward_rwf>floor(v_survey.partner_price_usd*v_rate*coalesce(v_respondent_share,0)/100)
+    ) then
+      raise exception 'Reward exceeds the configured funded respondent share. Check the USD/RWF rate and partner revenue split';
+    end if;
+  end if;
+  update public.surveys
+    set reward_rwf=p_reward_rwf,response_limit=p_response_limit,updated_at=now()
+    where id=p_survey_id;
+end;
+$function$;
+
+revoke all on function public.admin_update_survey_terms(uuid,integer,integer) from public,anon;
+grant execute on function public.admin_update_survey_terms(uuid,integer,integer) to authenticated;
+
+create or replace function public.start_survey_response(p_survey_id uuid,p_ip_hash text default null)
+returns uuid language plpgsql security definer set search_path=public
+as $function$
+declare
+  v_user uuid:=auth.uid();
+  v_survey public.surveys%rowtype;
+  v_profile public.profiles%rowtype;
+  v_age integer;
+  v_response_id uuid;
+  v_question_count integer;
+  v_daily_cap integer:=20;
+  v_today_count integer:=0;
+begin
+  if v_user is null then raise exception 'Authentication required'; end if;
+  select * into v_profile from public.profiles where id=v_user;
+  if not found then raise exception 'Complete your profile before starting a survey'; end if;
+
+  select coalesce((value #>> '{}')::integer,20) into v_daily_cap
+    from public.platform_settings where key='daily_survey_cap';
+  v_daily_cap:=greatest(1,coalesce(v_daily_cap,20));
+  select count(*)::integer into v_today_count
+    from public.survey_responses
+    where respondent_id=v_user
+      and started_at>=date_trunc('day',now())
+      and status in ('in_progress','submitted');
+  if v_today_count>=v_daily_cap then raise exception 'Daily survey limit reached'; end if;
+
+  select * into v_survey from public.surveys where id=p_survey_id for update;
+  if not found or v_survey.status<>'active' then raise exception 'Survey is not available'; end if;
+  select count(*)::integer into v_question_count from public.survey_questions where survey_id=p_survey_id;
+  if v_question_count<5 or v_question_count>10 then raise exception 'This survey is not available because its question count is invalid'; end if;
+  if v_survey.starts_at is not null and now()<v_survey.starts_at then raise exception 'Survey has not started'; end if;
+  if v_survey.ends_at is not null and now()>v_survey.ends_at then raise exception 'Survey has ended'; end if;
+  if v_survey.target_country is not null and v_survey.target_country<>v_profile.country_code then raise exception 'This survey is not available in your country'; end if;
+  if v_survey.target_region is not null and v_survey.target_region<>v_profile.region then raise exception 'This survey is not available in your region'; end if;
+  if v_survey.target_city is not null and v_survey.target_city<>v_profile.city then raise exception 'This survey is not available in your city'; end if;
+  if v_survey.target_province is not null and v_survey.target_province<>v_profile.province then raise exception 'This survey is not available in your province'; end if;
+  if v_survey.target_district is not null and v_survey.target_district<>v_profile.district then raise exception 'This survey is not available in your district'; end if;
+  if v_survey.target_sector is not null and v_survey.target_sector<>v_profile.sector then raise exception 'This survey is not available in your sector'; end if;
+  if v_survey.target_cell is not null and v_survey.target_cell<>v_profile.cell then raise exception 'This survey is not available in your cell'; end if;
+  if v_survey.target_village is not null and v_survey.target_village<>v_profile.village then raise exception 'This survey is not available in your village'; end if;
+  if v_survey.target_gender is not null and (v_profile.gender is null or v_survey.target_gender<>v_profile.gender) then raise exception 'This survey is not available for your profile'; end if;
+  if v_profile.date_of_birth is not null then
+    v_age:=date_part('year',age(current_date,v_profile.date_of_birth))::integer;
+    if v_survey.min_age is not null and v_age<v_survey.min_age then raise exception 'You do not meet the minimum age requirement'; end if;
+    if v_survey.max_age is not null and v_age>v_survey.max_age then raise exception 'You do not meet the maximum age requirement'; end if;
+  elsif v_survey.min_age is not null or v_survey.max_age is not null then
+    raise exception 'Add your date of birth to check survey eligibility';
+  end if;
+  if v_survey.response_limit is not null and v_survey.response_count>=v_survey.response_limit then raise exception 'Survey is full'; end if;
+
+  -- Keep the IP hash for fraud investigation, but do not reject every person
+  -- behind the same household, school, office or mobile-carrier NAT.
+  insert into public.survey_responses(survey_id,respondent_id,ip_hash)
+    values(p_survey_id,v_user,p_ip_hash)
+    returning id into v_response_id;
+  return v_response_id;
+exception when unique_violation then
+  raise exception 'You have already started or completed this survey';
+end;
+$function$;
+
+revoke all on function public.start_survey_response(uuid,text) from public,anon;
+grant execute on function public.start_survey_response(uuid,text) to authenticated;
+
+create or replace function public.admin_financial_summary()
+returns jsonb language plpgsql security definer set search_path=public
+as $function$
+declare
+  v_usage_usd numeric:=0;
+  v_rewards_rwf numeric:=0;
+  v_rate numeric:=0;
+  v_owner numeric:=40;
+  v_respondent numeric:=42;
+  v_reserve numeric:=18;
+  v_gross_rwf numeric:=0;
+  v_wallet_liability bigint:=0;
+  v_pending_payout bigint:=0;
+  v_pending_count bigint:=0;
+  v_partner_credit numeric:=0;
+  v_reserved_budget numeric:=0;
+begin
+  if auth.uid() is null or not public.is_admin() then raise exception 'Admin access required'; end if;
+  select coalesce(sum(abs(amount_usd)),0) into v_usage_usd
+    from public.partner_billing where event_type='response_charge';
+  select coalesce(sum(sr.reward_rwf),0) into v_rewards_rwf
+    from public.survey_responses sr join public.surveys s on s.id=sr.survey_id
+    where sr.status='submitted' and s.partner_id is not null;
+  select coalesce((value #>> '{}')::numeric,0) into v_rate
+    from public.platform_settings where key='usd_to_rwf_rate';
+  select coalesce((value->'partner'->>'owner')::numeric,40),
+         coalesce((value->'partner'->>'respondent')::numeric,42),
+         coalesce((value->'partner'->>'reserve')::numeric,18)
+    into v_owner,v_respondent,v_reserve
+    from public.platform_settings where key='revenue_splits';
+  select coalesce(sum(balance_rwf),0) into v_wallet_liability from public.wallets;
+  select coalesce(sum(amount_rwf),0),count(*) into v_pending_payout,v_pending_count
+    from public.payout_requests where status in ('pending','processing');
+  select coalesce(sum(credit_usd),0) into v_partner_credit from public.partner_accounts;
+  select coalesce(sum(reserved_budget_usd),0) into v_reserved_budget from public.surveys;
+  v_gross_rwf:=v_usage_usd*v_rate;
+  return jsonb_build_object(
+    'partner_usage_usd',round(v_usage_usd,2),
+    'partner_usage_rwf_estimate',round(v_gross_rwf),
+    'respondent_rewards_rwf',v_rewards_rwf,
+    'estimated_margin_before_other_costs_rwf',round(v_gross_rwf-v_rewards_rwf),
+    'platform_share_target_rwf',round(v_gross_rwf*v_owner/100),
+    'respondent_pool_target_rwf',round(v_gross_rwf*v_respondent/100),
+    'reserve_target_rwf',round(v_gross_rwf*v_reserve/100),
+    'usd_to_rwf_rate',v_rate,
+    'response_count',(select count(*) from public.partner_billing where event_type='response_charge'),
+    'wallet_liability_rwf',v_wallet_liability,
+    'pending_payout_liability_rwf',v_pending_payout,
+    'pending_payout_count',v_pending_count,
+    'available_partner_credit_usd',round(v_partner_credit,2),
+    'reserved_partner_budget_usd',round(v_reserved_budget,2)
+  );
+end;
+$function$;
+
+revoke all on function public.admin_financial_summary() from public,anon;
+grant execute on function public.admin_financial_summary() to authenticated;
