@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 function safeHeader(value: string | null, max = 120) {
   if (!value) return null;
@@ -29,7 +30,15 @@ export async function POST() {
     .eq("id", user.id).maybeSingle();
   const mismatch = Boolean(country && profile?.country_code && country !== profile.country_code.toUpperCase());
   const riskFlags = mismatch ? ["ip_country_differs_from_profile"] : [];
-  const { error } = await supabase.from("account_security_events").insert({
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    return NextResponse.json({ error: "Security event service is not configured" }, { status: 503 });
+  }
+  const privilegedClient = createSupabaseClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  });
+  const { error } = await privilegedClient.from("account_security_events").insert({
     user_id: user.id,
     event_type: mismatch ? "country_change" : "session_check",
     ip_hash: ipHash,
