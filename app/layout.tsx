@@ -7,12 +7,12 @@ import "./globals.css";
 const SITE_URL = "https://www.expertsearn.mywire.org";
 const SITE_NAME = "ExpertsEarn";
 const SITE_DESCRIPTION =
-  "ExpertsEarn is an online survey and research rewards platform for Rwanda and supported markets. Discover eligible paid surveys, share your opinions and track approved rewards in Rwandan francs (RWF).";
+  "ExpertsEarn is a worldwide survey and research rewards platform. Join from supported locations, discover eligible paid surveys, share your opinions and track approved rewards. Survey availability and reward terms vary by country.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Online Surveys & Rewards in Rwanda",
+    default: "Online Surveys & Rewards Worldwide",
     template: "%s | ExpertsEarn",
   },
   description: SITE_DESCRIPTION,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: "Online Surveys & Rewards in Rwanda | ExpertsEarn",
+    title: "Online Surveys & Rewards Worldwide | ExpertsEarn",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     locale: "en_RW",
@@ -52,7 +52,7 @@ const organizationSchema = {
       description: SITE_DESCRIPTION,
       slogan: "Your insight has value.",
       knowsLanguage: ["en", "rw", "fr"],
-      areaServed: [{ "@type": "Country", name: "Rwanda" }, "International markets"],
+      areaServed: "Worldwide",
     },
     {
       "@type": "WebSite",
