@@ -1,69 +1,53 @@
-# ExpertsEarn authentication email delivery (EmailJS)
+# ExpertsEarn authentication email delivery (Mailjet)
 
-This function is the production delivery adapter for Supabase Auth's Send Email Hook. Supabase remains responsible for creating and validating OTPs/token hashes; EmailJS only delivers the message.
+Supabase Auth remains responsible for creating and validating OTPs and token hashes. The Edge Function verifies Supabase's signed Send Email Hook request and delivers the message through Mailjet's API v3.1.
 
-## EmailJS setup (free plan)
+## Verified sender
 
-1. Create an EmailJS account and connect the mailbox you want to send from.
-2. Create one email template. The free plan currently allows two templates, so one shared template is enough for all Supabase auth events.
-3. Configure the template fields:
-   - **To email:** `{{to_email}}`
-   - **To name:** `{{to_name}}`
-   - **Subject:** `{{subject}}`
-   - **From name:** `ExpertsEarn`
-   - **Reply-to:** `expertsearn@gmail.com`
-4. Use this HTML body (the template variables are supplied by the Edge Function):
+Use the sender address already verified in Mailjet:
 
-```html
-<div style="margin:0;padding:32px 12px;background:#f4f6f8;font-family:Arial,sans-serif;color:#17212b">
-  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden">
-    <div style="padding:26px 30px;background:#123b32;color:#ffffff">
-      <div style="font-size:12px;letter-spacing:2px;font-weight:700">EXPERTSEARN</div>
-      <h1 style="margin:18px 0 0;font-size:25px">{{headline}}</h1>
-    </div>
-    <div style="padding:30px">
-      <p style="margin:0 0 16px">Hello {{to_name}},</p>
-      <p style="line-height:1.65">{{message}}</p>
-      <p style="margin:28px 0">
-        <a href="{{action_url}}" style="display:inline-block;padding:14px 22px;border-radius:9px;background:#176b52;color:#ffffff;text-decoration:none;font-weight:700">{{action_label}}</a>
-      </p>
-      <p style="font-size:13px;color:#65716c">If you did not request this, you can ignore this email. Never share a verification code with anyone.</p>
-      <p style="font-size:13px;color:#65716c">Need help? <a href="mailto:{{support_email}}">{{support_email}}</a></p>
-    </div>
-    <div style="padding:18px 30px;background:#f8faf9;color:#65716c;font-size:12px">© {{year}} ExpertsEarn · Your Opinions. Your Rewards.</div>
-  </div>
-</div>
-```
+- From email: `expertsearn@gmail.com`
+- From name: `ExpertsEarn`
+- Reply/support email: `expertsearn@gmail.com`
 
-5. Save the EmailJS **Service ID**, **Template ID**, and **Public Key**. Keep the **Private Key** secret.
+Mailjet may accept a verified sender address without domain authentication. SPF/DKIM authentication can be configured later if DNS access is available and is recommended for deliverability.
 
 ## Supabase Edge Function secrets
 
-In Supabase Dashboard → Edge Functions → Secrets, add:
+In Supabase Dashboard → Edge Functions → Secrets, configure:
 
-- `EMAILJS_SERVICE_ID`
-- `EMAILJS_TEMPLATE_ID`
-- `EMAILJS_PUBLIC_KEY`
-- `EMAILJS_PRIVATE_KEY`
-- `SEND_EMAIL_HOOK_SECRET` — generate this in Authentication → Hooks → Send Email Hook. Preserve its full `v1,whsec_...` value.
+- `MAILJET_API_KEY` — Mailjet API key (public key)
+- `MAILJET_SECRET_KEY` — Mailjet secret key; never expose it in frontend code or commit it
+- `MAILJET_FROM_EMAIL` = `expertsearn@gmail.com`
+- `SEND_EMAIL_HOOK_SECRET` — full signing secret generated for the Supabase Authentication → Hooks → Send Email Hook (keep its `v1,whsec_...` prefix)
 - `APP_URL` = `https://www.expertsearn.mywire.org`
 
-Supabase supplies `SUPABASE_URL` to Edge Functions. The service-role/secret key is not needed by this function.
+Supabase supplies `SUPABASE_URL` to Edge Functions. Do not add the Supabase service-role key to this function.
 
-## Activate the hook
+## Deploy
 
-After all secrets are saved, open Supabase Dashboard → Authentication → Hooks → Send Email Hook:
+Deploy `supabase/functions/experts-earn-auth-email/index.ts` as the Edge Function named `experts-earn-auth-email`, with JWT verification disabled because the function authenticates the request using the Standard Webhooks signature.
 
-- Enable the Email Provider (email signups must remain enabled).
-- Select **HTTP Hook**.
-- URL: `https://jaimcybsmrzktuglpxmd.supabase.co/functions/v1/experts-earn-auth-email`
-- Send the generated hook secret using the dashboard's supported signing-secret configuration.
-- Save/enable the hook only after secrets are present.
+The function sends via `https://api.mailjet.com/v3.1/send` using HTTP Basic authentication with the Mailjet API key and secret key. It handles signup, invite, magic-link, recovery, email confirmation/change, reauthentication, and account-security notification events.
 
-The function verifies the Standard Webhooks signature and returns an error if configuration or provider delivery fails. Do not enable the hook before all secrets are configured, or sign-up and password-reset requests may fail. Keep email confirmation enabled.
+## Activate only after testing
 
-## Free-plan capacity and operational notes
+The Supabase Send Email Hook must remain disabled until all secrets are configured and a controlled end-to-end test succeeds.
 
-EmailJS's Free plan currently lists 200 requests per month and is described as a testing tier. It can deliver real emails, but it is a small-launch allowance, not a guaranteed high-volume production mail service. Requests above quota may be dropped. Monitor usage and delivery history. Do not create multiple free accounts to bypass the quota.
+When ready, open Supabase Dashboard → Authentication → Hooks → Send Email Hook and configure the HTTP Hook URL:
 
-The function uses one EmailJS template for confirmation, recovery, email changes, and security notifications. It sends the two separate confirmation messages required when Supabase Secure Email Change is enabled. It never generates tokens itself and never logs token values.
+`https://jaimcybsmrzktuglpxlqpt.supabase.co/functions/v1/experts-earn-auth-email`
+
+Use the actual project URL shown in Supabase if it differs. Keep email signups and email confirmation enabled.
+
+Test at minimum:
+1. A new signup reaches the inbox and the confirmation link completes signup.
+2. Password recovery reaches the inbox and the reset link opens the password reset flow.
+3. Email-change confirmation works for both current and new addresses if Secure Email Change is enabled.
+4. Mailjet's activity log records successful acceptance.
+
+Do not test with real user accounts until the hook configuration is checked. Never log or share OTPs, token hashes, API keys, or webhook signing secrets.
+
+## Operational notes
+
+Mailjet's free-plan allowance and daily caps can change; check the current plan in the Mailjet dashboard. A successful API response means Mailjet accepted the message, not that it reached the recipient's inbox. Monitor bounces, spam complaints, and delivery events in Mailjet.
