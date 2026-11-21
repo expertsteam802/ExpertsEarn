@@ -1,0 +1,1 @@
+create index if not exists profiles_account_status_updated_by_idx on public.profiles(account_status_updated_by);

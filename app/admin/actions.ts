@@ -56,6 +56,31 @@ export async function updateUserRole(formData: FormData) {
   redirect("/admin?tab=users&user_updated=1");
 }
 
+
+export async function updateAccountStatus(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  await requireAdmin(supabase, user.id);
+  const userId = String(formData.get("user_id") || "");
+  const status = String(formData.get("status") || "");
+  const reason = String(formData.get("reason") || "").trim();
+  const expiryRaw = String(formData.get("locked_until") || "").trim();
+  const expiryMs = expiryRaw ? Date.parse(expiryRaw) : null;
+  if (expiryRaw && (!Number.isFinite(expiryMs) || expiryMs! <= Date.now())) redirect("/admin/security?error=invalid_lock_expiry");
+  const lockedUntil = expiryMs === null ? null : new Date(expiryMs).toISOString();
+  if (!userId || !["active", "locked", "suspended"].includes(status)) redirect("/admin/security?error=invalid_status");
+  if (status !== "active" && reason.length < 5) redirect("/admin/security?error=reason_required");
+  const { error } = await supabase.rpc("admin_set_account_status", {
+    p_user_id: userId,
+    p_status: status,
+    p_reason: reason || null,
+    p_locked_until: status === "locked" ? lockedUntil : null
+  });
+  if (error) redirect("/admin/security?error=" + encodeURIComponent(error.message));
+  redirect("/admin/security?updated=1");
+}
+
 export async function updatePlatformSetting(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
