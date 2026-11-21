@@ -63,13 +63,14 @@ export async function updatePlatformSetting(formData: FormData) {
   await requireAdmin(supabase,user.id);
   const key = String(formData.get("key") || "");
   const raw = String(formData.get("value") || "");
-  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding", "location_cpm_rates", "usd_to_rwf_rate"];
+  const allowed = ["daily_survey_cap", "minimum_payout_rwf", "revenue_splits", "survey_pricing_usd", "supported_languages", "public_branding", "location_cpm_rates", "usd_to_rwf_rate", "expertscoins_per_rwf"];
   if (!allowed.includes(key)) return {ok:false,error:"This setting is not allowed."};
   let value: unknown;
   try { value = JSON.parse(raw); } catch { return {ok:false,error:"Enter valid JSON before saving."}; }
   if (key === "daily_survey_cap" && (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 500)) return {ok:false,error:"Daily survey cap must be between 1 and 500."};
   if (key === "minimum_payout_rwf" && (!Number.isInteger(Number(value)) || Number(value) < 1000 || Number(value) > 10000000)) return {ok:false,error:"Minimum payout must be between 1,000 and 10,000,000 RWF."};
   if (key === "usd_to_rwf_rate" && (!Number.isFinite(Number(value)) || Number(value) < 1 || Number(value) > 100000)) return {ok:false,error:"Enter a valid RWF per USD exchange rate."};
+  if (key === "expertscoins_per_rwf" && (!Number.isFinite(Number(value)) || Number(value) < 0.000001 || Number(value) > 1000000)) return {ok:false,error:"ExpertsCoins rate must be between 0.000001 and 1,000,000 EC per RWF."};
   if (key === "revenue_splits") {
     const split=value as any; const partner=split?.partner;
     if (!partner || !["owner","respondent","reserve"].every(k=>Number.isFinite(partner[k]) && partner[k]>=0 && partner[k]<=100) || partner.owner+partner.respondent+partner.reserve!==100) return {ok:false,error:"Partner revenue shares must total exactly 100%."};
