@@ -8,7 +8,7 @@ import {House,ClipboardList,Wallet,Medal,UserRound,Shield,ArrowUpRight,Clock3,Se
 type Survey={id:string;title:string;description:string|null;reward_rwf:number;reward_ec:number;question_count:number;language:string};
 type Props={name:string;avatarUrl:string;email:string;role:string;balanceEc:number;lifetimeEc:number;ecRate:number;surveys:Survey[]};
 const tabs=[{id:"home",label:"Overview",icon:House},{id:"surveys",label:"Discover",icon:ClipboardList},{id:"wallet",label:"Wallet",icon:Wallet},{id:"ranks",label:"Ranks",icon:Medal},{id:"profile",label:"Profile",icon:UserRound}];
-export function DashboardShell({name,avatarUrl,email,role,balanceEc,lifetimeEc,ecRate,surveys}:Props){
+export function DashboardShell({name,avatarUrl,email,role,balanceEc,lifetimeEc,surveys}:Props){
  const [tab,setTab]=useState("home");const [selected,setSelected]=useState<Survey|null>(null);
  const current=tabs.find(t=>t.id===tab);
  return <main className="min-h-screen bg-[#090a0f] text-[#f2ecdf]">
