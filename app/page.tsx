@@ -54,7 +54,7 @@ export default function HomePage() {
         </nav>
         <div className="flex items-center gap-3">
           <Link href="/login" className="hidden px-3 py-2 text-sm font-bold text-[#d6d0c5] sm:block">Log in</Link>
-          <Link href="/signup" className="metal-button text-sm">Create account <ArrowUpRight size={16} /></Link>
+          <AdFirstClickLink href="/signup" className="metal-button text-sm" label="Create account">Create account <ArrowUpRight size={16} /></AdFirstClickLink>
         </div>
       </header>
 
@@ -65,7 +65,7 @@ export default function HomePage() {
             <div className="eyebrow flex items-center gap-3"><span className="h-px w-9 bg-[#c6a873]" /> ExpertsEarn · Independent insight network</div>
             <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-.055em] text-[#f3eee4] sm:text-6xl lg:text-[76px]">Paid online surveys<br /><span className="font-serif italic font-normal text-[#c9ad7d]">worldwide. Your insight has value.</span></h1>
             <p className="mt-7 max-w-xl text-[17px] leading-8 text-[#aaa6a2]">Discover paid online surveys and research studies from teams around the world. Share your perspective, help shape better products and services, and earn eligible rewards in Rwandan francs (RWF).</p>
-            <div className="mt-9 flex flex-wrap gap-3"><Link href="/signup" className="metal-button">Join ExpertsEarn <MoveUpRight size={17} /></Link><AdFirstClickLink href="/partners" className="ghost-button" label="Research partner access">Research partner access</AdFirstClickLink></div>
+            <div className="mt-9 flex flex-wrap gap-3"><AdFirstClickLink href="/signup" className="metal-button" label="Join ExpertsEarn">Join ExpertsEarn <MoveUpRight size={17} /></AdFirstClickLink><AdFirstClickLink href="/partners" className="ghost-button" label="Research partner access">Research partner access</AdFirstClickLink></div>
             <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#77767c]"><span className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#c6a873]" /> Privacy-aware participation</span><span>English · Kinyarwanda · Français</span></div>
           </div>
           <div className="relative mx-auto w-full max-w-[490px]">
