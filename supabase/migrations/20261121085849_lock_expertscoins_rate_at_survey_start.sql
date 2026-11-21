@@ -1,4 +1,4 @@
-alter table public.survey_responses
+-- Complete the one-time launch backfill for balances that existed before EC columns were added.\nupdate public.wallets set balance_ec=balance_rwf,lifetime_earned_ec=lifetime_earned_rwf,lifetime_paid_ec=lifetime_paid_rwf;\nupdate public.wallet_transactions set amount_ec=amount_rwf,ec_per_rwf=1 where amount_rwf<>0;\nupdate public.wallet_credit_lots set remaining_ec=remaining_rwf,ec_per_rwf=1 where source_transaction_id is null;\n\nalter table public.survey_responses
  add column if not exists ec_per_rwf numeric(20,8),
  add column if not exists reward_ec numeric(20,4);
 
