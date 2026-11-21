@@ -12,7 +12,7 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
   if (!responseId) notFound();
   const [{ data: response }, { data: rewardTx }] = await Promise.all([supabase
     .from("survey_responses")
-    .select("id,status,reward_rwf")
+    .select("id,status,reward_rwf,reward_ec")
     .eq("id", responseId)
     .eq("respondent_id", user.id)
     .eq("status", "submitted")
@@ -20,7 +20,7 @@ export default async function CompletePage({ searchParams }: { searchParams: Pro
     supabase.from("wallet_transactions").select("amount_ec,amount_rwf").eq("user_id",user.id).eq("reference_id",responseId).eq("transaction_type","survey_reward").maybeSingle()
   ]);
   if (!response) notFound();
-  const reward = Math.max(0, Number(rewardTx?.amount_ec ?? response.reward_rwf ?? 0));
+  const reward = Math.max(0, Number(rewardTx?.amount_ec ?? response.reward_ec ?? response.reward_rwf ?? 0));
   const cashValue = Math.max(0, Number(rewardTx?.amount_rwf ?? response.reward_rwf ?? 0));
 
   return <main className="grid min-h-screen place-items-center px-5">
