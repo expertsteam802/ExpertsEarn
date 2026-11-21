@@ -7,7 +7,7 @@ export const revalidate = 0;
 export default async function DashboardPage(){
  const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  const [{data:profile},{data:wallet},{data:allSurveys},{data:responses},{data:ecSetting}]=await Promise.all([
-  supabase.from("profiles").select("display_name,avatar_url,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth").eq("id",user.id).maybeSingle(),
+  supabase.from("profiles").select("display_name,avatar_url,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth,account_status,account_locked_until,account_status_reason").eq("id",user.id).maybeSingle(),
   supabase.from("wallets").select("balance_rwf,lifetime_earned_rwf,balance_ec,lifetime_earned_ec").eq("user_id",user.id).maybeSingle(),
   supabase.from("surveys").select("id,title,description,reward_rwf,question_count,language,response_count,response_limit,starts_at,ends_at,target_country,target_region,target_city,target_province,target_district,target_sector,target_cell,target_village,target_gender,min_age,max_age").eq("status","active").gt("reward_rwf",0).order("created_at",{ascending:false}).limit(200),
   supabase.from("survey_responses").select("survey_id,status").eq("respondent_id",user.id),
@@ -32,5 +32,6 @@ export default async function DashboardPage(){
   if(s.max_age!==null&&age!==null&&age>s.max_age) return false;
   return true;
  }).map(s=>({...s,question_count:s.question_count||0,reward_ec:Number(s.reward_rwf||0)*ecRate}));
- return <DashboardShell name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balanceEc={Number(wallet?.balance_ec??wallet?.balance_rwf??0)} lifetimeEc={Number(wallet?.lifetime_earned_ec??wallet?.lifetime_earned_rwf??0)} surveys={eligible as any}/>;
+ const accountRestricted = profile?.account_status === "suspended" || (profile?.account_status === "locked" && (!profile?.account_locked_until || new Date(profile.account_locked_until).getTime() > Date.now()));
+ return <DashboardShell accountRestricted={accountRestricted} restrictionReason={profile?.account_status_reason||""} name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balanceEc={Number(wallet?.balance_ec??wallet?.balance_rwf??0)} lifetimeEc={Number(wallet?.lifetime_earned_ec??wallet?.lifetime_earned_rwf??0)} surveys={accountRestricted?[]:eligible as any}/>;
 }
