@@ -44,7 +44,8 @@ Deno.serve(async req=>{
   const action=event.email_data?.email_action_type,email=event.user?.email?.trim();
   if(!action||!email)throw new Error("Invalid Supabase Auth Hook payload");
   const name=(event.user.user_metadata?.display_name??event.user.user_metadata?.full_name??"there").replace(/[<>\r\n]/g,"").slice(0,80)||"there";
-  const red=redirect(event.email_data.redirect_to),d=event.email_data;
+  const d=event.email_data;
+  const red=action==="recovery"?new URL("/reset-password",APP_URL).toString():redirect(d.redirect_to);
   if(action==="email_change"){
    const newEmail=event.user.new_email?.trim();
    if(d.token_hash_new&&d.token_hash&&d.token&&d.token_new&&newEmail){
