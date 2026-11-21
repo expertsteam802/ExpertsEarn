@@ -18,13 +18,13 @@ export function SiteAdPlacements() {
     // Monetag In-Page Push is a banner-style placement that Monetag positions
     // automatically (desktop: usually upper-right; mobile: usually top).
     // Load one copy per eligible page and keep it out of payout/identity flows.
-    const existing = document.getElementById("monetag-inpage-12294866");
+    const existing = document.getElementById("monetag-inpage-loader");
     if (existing) return;
 
     const script = document.createElement("script");
-    script.id = "monetag-inpage-12294866";
+    script.id = "monetag-inpage-loader";
     script.src = "https://nap5k.com/tag.min.js";
-    script.dataset.zone = "12294866";
+    script.dataset.zone = "12296064";
     script.async = true;
     script.setAttribute("data-cfasync", "false");
     document.head.appendChild(script);
