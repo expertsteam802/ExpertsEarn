@@ -75,15 +75,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         {monetagEligible && (
           <script
+            id="monetag-inpage-loader"
             dangerouslySetInnerHTML={{
-              __html: "(function(s){s.dataset.zone='12294866',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
+              __html: "(function(s){s.dataset.zone='12296064',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
             }}
           />
         )}
         {monetagEligible && (
           <script
+            id="monetag-vignette-loader"
             dangerouslySetInnerHTML={{
-              __html: "(function(s){s.dataset.zone='12294868',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
+              __html: "(function(s){s.dataset.zone='12296060',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))",
             }}
           />
         )}
