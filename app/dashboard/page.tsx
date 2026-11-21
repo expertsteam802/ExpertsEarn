@@ -32,5 +32,5 @@ export default async function DashboardPage(){
   if(s.max_age!==null&&age!==null&&age>s.max_age) return false;
   return true;
  }).map(s=>({...s,question_count:s.question_count||0,reward_ec:Number(s.reward_rwf||0)*ecRate}));
- return <DashboardShell name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balanceEc={Number(wallet?.balance_ec??wallet?.balance_rwf??0)} lifetimeEc={Number(wallet?.lifetime_earned_ec??wallet?.lifetime_earned_rwf??0)} ecRate={ecRate} surveys={eligible as any}/>;
+ return <DashboardShell name={profile?.display_name||""} avatarUrl={profile?.avatar_url||""} email={user.email||""} role={profile?.role||"respondent"} balanceEc={Number(wallet?.balance_ec??wallet?.balance_rwf??0)} lifetimeEc={Number(wallet?.lifetime_earned_ec??wallet?.lifetime_earned_rwf??0)} surveys={eligible as any}/>;
 }
