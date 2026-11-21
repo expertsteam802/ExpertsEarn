@@ -1,6 +1,16 @@
 alter table public.surveys
   add column if not exists reserved_budget_usd numeric(12,2) not null default 0;
 
+-- Hide active surveys that have no respondent reward and cap legacy uncapped
+-- paid surveys so an accidental unlimited publication cannot create an
+-- unbounded wallet liability. Admins can raise the cap after funding review.
+update public.surveys
+  set status='paused',updated_at=now()
+  where status='active' and reward_rwf<=0;
+update public.surveys
+  set response_limit=20,updated_at=now()
+  where status='active' and response_limit is null and reward_rwf>0;
+
 drop policy if exists "answers delete own in progress" on public.response_answers;
 create policy "answers delete own in progress"
 on public.response_answers for delete to authenticated
@@ -35,6 +45,9 @@ begin
   if not found then raise exception 'Survey not found'; end if;
 
   if p_status = 'active' then
+    if v_survey.response_limit is null or v_survey.response_limit < 1 then
+      raise exception 'Every published survey must have a fixed response cap';
+    end if;
     select count(*)::integer into v_question_count
       from public.survey_questions where survey_id=p_survey_id;
     if v_question_count < 5 or v_question_count > 10 then
@@ -54,6 +67,9 @@ begin
         from public.platform_settings where key='usd_to_rwf_rate';
       select coalesce((value->'partner'->>'respondent')::numeric,0) into v_respondent_share
         from public.platform_settings where key='revenue_splits';
+      if v_survey.partner_price_usd<>round(v_survey.partner_price_usd,2) then
+        raise exception 'Partner response price must use no more than two decimal places';
+      end if;
       if coalesce(v_survey.reward_rwf,0)<=0 then
         raise exception 'Partner surveys must offer a positive respondent reward';
       end if;
@@ -253,15 +269,17 @@ begin
   if p_reward_rwf is null or p_reward_rwf<0 or p_reward_rwf>1000000 then
     raise exception 'Reward must be between 0 and 1,000,000 RWF';
   end if;
-  if p_response_limit is not null and (p_response_limit<1 or p_response_limit>1000000) then
-    raise exception 'Response limit must be between 1 and 1,000,000';
+  if p_response_limit is null or p_response_limit<1 or p_response_limit>1000000 then
+    raise exception 'Every survey must have a response cap between 1 and 1,000,000';
   end if;
   select * into v_survey from public.surveys where id=p_survey_id for update;
   if not found or v_survey.status not in ('draft','paused') then
     raise exception 'Only draft or paused surveys can be edited';
   end if;
   if v_survey.partner_id is not null then
-    if p_response_limit is null then raise exception 'Partner surveys require a fixed response limit'; end if;
+    if v_survey.partner_price_usd<>round(v_survey.partner_price_usd,2) then
+      raise exception 'Partner response price must use no more than two decimal places';
+    end if;
     select coalesce((value #>> '{}')::numeric,0) into v_rate
       from public.platform_settings where key='usd_to_rwf_rate';
     select coalesce((value->'partner'->>'respondent')::numeric,0) into v_respondent_share
@@ -425,6 +443,7 @@ declare
   v_pending_count bigint:=0;
   v_partner_credit numeric:=0;
   v_reserved_budget numeric:=0;
+  v_owner_reward_exposure bigint:=0;
 begin
   if auth.uid() is null or not public.is_admin() then raise exception 'Admin access required'; end if;
   select coalesce(sum(abs(amount_usd)),0) into v_usage_usd
@@ -447,6 +466,10 @@ begin
     from public.payout_requests where status in ('pending','processing');
   select coalesce(sum(credit_usd),0) into v_partner_credit from public.partner_accounts;
   select coalesce(sum(reserved_budget_usd),0) into v_reserved_budget from public.surveys;
+  select coalesce(sum(greatest(0,response_limit-response_count)*reward_rwf),0)
+    into v_owner_reward_exposure
+    from public.surveys
+    where status='active' and partner_id is null and response_limit is not null;
   v_gross_rwf:=v_usage_usd*v_rate;
   return jsonb_build_object(
     'partner_usage_usd',round(v_usage_usd,2),
@@ -465,7 +488,8 @@ begin
     'pending_payout_liability_rwf',v_pending_payout,
     'pending_payout_count',v_pending_count,
     'available_partner_credit_usd',round(v_partner_credit,2),
-    'reserved_partner_budget_usd',round(v_reserved_budget,2)
+    'reserved_partner_budget_usd',round(v_reserved_budget,2),
+    'owner_funded_reward_exposure_rwf',v_owner_reward_exposure
   );
 end;
 $function$;
