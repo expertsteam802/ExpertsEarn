@@ -67,7 +67,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "One or more survey text, language or targeting fields are invalid." }, { status: 400 });
   }
 
-  const { data: pricingSetting, error: pricingError } = await auth.admin.from("platform_settings").select("value").eq("key", "survey_pricing_usd").maybeSingle();
+  const [{ data: pricingSetting, error: pricingError }, { data: rateSetting }, { data: splitSetting }] = await Promise.all([
+    auth.admin.from("platform_settings").select("value").eq("key", "survey_pricing_usd").maybeSingle(),
+    auth.admin.from("platform_settings").select("value").eq("key", "usd_to_rwf_rate").maybeSingle(),
+    auth.admin.from("platform_settings").select("value").eq("key", "revenue_splits").maybeSingle()
+  ]);
   if (pricingError) return NextResponse.json({ error: "Survey pricing is temporarily unavailable." }, { status: 503 });
   const minPrice = Number(pricingSetting?.value?.min ?? 0.2);
   const maxPrice = Number(pricingSetting?.value?.max ?? 0.5);
@@ -87,7 +91,7 @@ export async function POST(request: NextRequest) {
   const maxAffordableReward = exchangeRate > 0 ? Math.floor(price * exchangeRate * respondentShare / 100) : 0;
   if (!Number.isSafeInteger(rewardRwf) || rewardRwf < 0 || rewardRwf > maxAffordableReward ||
       (targetGender !== null && (typeof targetGender !== "string" || !["female", "male", "non_binary", "prefer_not_to_say"].includes(targetGender))) ||
-      (responseLimit !== null && (!Number.isInteger(responseLimit) || responseLimit < 1 || responseLimit > 100000)) ||
+      (responseLimit === null || !Number.isInteger(responseLimit) || responseLimit < 1 || responseLimit > 100000) ||
       (minAge !== null && (!Number.isInteger(minAge) || minAge < 13 || minAge > 100)) ||
       (maxAge !== null && (!Number.isInteger(maxAge) || maxAge < 13 || maxAge > 100)) ||
       (minAge !== null && maxAge !== null && minAge > maxAge)) {
