@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function AuthForm({ mode }: { mode: "login" | "signup" }) {
+export function AuthForm({ mode, referralCode = "" }: { mode: "login" | "signup"; referralCode?: string }) {
   const [email,setEmail] = useState(""); const [password,setPassword] = useState("");
   const [name,setName] = useState(""); const [error,setError] = useState(""); const [busy,setBusy] = useState(false); const [confirmationPending,setConfirmationPending]=useState(false);
   const router = useRouter(); const supabase = createClient();
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError("");
     const result = mode === "signup"
-      ? await supabase.auth.signUp({ email, password, options: { data: { display_name: name }, emailRedirectTo: `${window.location.origin}/auth/callback` } })
+      ? await supabase.auth.signUp({ email, password, options: { data: { display_name: name, ...(referralCode ? { referral_code: referralCode } : {}) }, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       : await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (result.error) { setError(result.error.message); return; }
