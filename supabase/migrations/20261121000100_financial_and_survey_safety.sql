@@ -48,6 +48,9 @@ begin
     if v_survey.response_limit is null or v_survey.response_limit < 1 then
       raise exception 'Every published survey must have a fixed response cap';
     end if;
+    if v_survey.response_count>=v_survey.response_limit then
+      raise exception 'This survey has already reached its response cap';
+    end if;
     select count(*)::integer into v_question_count
       from public.survey_questions where survey_id=p_survey_id;
     if v_question_count < 5 or v_question_count > 10 then
@@ -275,6 +278,9 @@ begin
   select * into v_survey from public.surveys where id=p_survey_id for update;
   if not found or v_survey.status not in ('draft','paused') then
     raise exception 'Only draft or paused surveys can be edited';
+  end if;
+  if p_response_limit<=v_survey.response_count then
+    raise exception 'Response cap must be higher than the number of completed responses';
   end if;
   if v_survey.partner_id is not null then
     if v_survey.partner_price_usd<>round(v_survey.partner_price_usd,2) then
