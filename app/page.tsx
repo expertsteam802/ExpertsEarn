@@ -5,12 +5,12 @@ import { Brand } from "@/components/brand";
 import { AdFirstClickLink } from "@/components/ad-first-click-link";
 
 export const metadata: Metadata = {
-  title: { absolute: "Paid Online Surveys in Rwanda | ExpertsEarn" },
-  description: "Find eligible paid online surveys with ExpertsEarn. Share your opinions, take part in research and track approved rewards in Rwandan francs (RWF).",
+  title: { absolute: "Paid Online Surveys Worldwide | ExpertsEarn" },
+  description: "Join ExpertsEarn from supported locations worldwide. Discover eligible paid surveys, share your opinions and track approved rewards. Survey availability and reward terms vary by country.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Paid Online Surveys in Rwanda | ExpertsEarn",
-    description: "Find eligible online surveys in Rwanda with ExpertsEarn. Share your perspective, take part in research and track approved rewards in RWF.",
+    title: "Paid Online Surveys Worldwide | ExpertsEarn",
+    description: "Discover eligible online surveys with ExpertsEarn worldwide. Share your perspective, take part in research and track approved rewards. Availability varies by country.",
     url: "/",
   },
 };
@@ -63,8 +63,8 @@ export default function HomePage() {
         <div className="container grid min-h-[690px] items-center gap-16 py-20 lg:grid-cols-[1.08fr_.92fr]">
           <div className="max-w-[730px]">
             <div className="eyebrow flex items-center gap-3"><span className="h-px w-9 bg-[#c6a873]" /> ExpertsEarn · Independent insight network</div>
-            <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-.055em] text-[#f3eee4] sm:text-6xl lg:text-[76px]">Paid online surveys<br /><span className="font-serif italic font-normal text-[#c9ad7d]">in Rwanda. Your insight has value.</span></h1>
-            <p className="mt-7 max-w-xl text-[17px] leading-8 text-[#aaa6a2]">Discover paid online surveys in Rwanda and research studies from international teams. Share your perspective, help shape better products and services, and earn eligible rewards in Rwandan francs (RWF).</p>
+            <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-.055em] text-[#f3eee4] sm:text-6xl lg:text-[76px]">Paid online surveys<br /><span className="font-serif italic font-normal text-[#c9ad7d]">worldwide. Your insight has value.</span></h1>
+            <p className="mt-7 max-w-xl text-[17px] leading-8 text-[#aaa6a2]">Discover paid online surveys and research studies from teams around the world. Share your perspective, help shape better products and services, and earn eligible rewards in Rwandan francs (RWF).</p>
             <div className="mt-9 flex flex-wrap gap-3"><Link href="/signup" className="metal-button">Join ExpertsEarn <MoveUpRight size={17} /></Link><AdFirstClickLink href="/partners" className="ghost-button" label="Research partner access">Research partner access</AdFirstClickLink></div>
             <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#77767c]"><span className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#c6a873]" /> Privacy-aware participation</span><span>English · Kinyarwanda · Français</span></div>
           </div>
@@ -92,7 +92,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-y border-white/[.07] bg-[#0e0f15] py-20">
-        <div className="container grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="eyebrow">Paid online surveys in Rwanda</p><h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-[#f0e9dc] sm:text-4xl">Earn RWF rewards for sharing local knowledge and lived experience.</h2><p className="mt-4 max-w-2xl leading-7 text-[#969198]">Research helps organizations understand the people they serve. ExpertsEarn gives eligible participants in Rwanda and other supported markets a place to discover studies, review reward terms and contribute their views. Study availability, eligibility and reward amounts vary; no earnings are guaranteed.</p><Link href="/how-it-works" className="ghost-button mt-6">See how participation works <ArrowUpRight size={16} /></Link></div><div className="surface max-w-sm p-6"><h3 className="text-lg font-bold text-[#eee7dc]">Research in three languages</h3><p className="mt-3 text-sm leading-7 text-[#969198]">Explore the platform in English, Kinyarwanda or Français. Each research team selects the languages available for its own study.</p><p className="mt-5 text-xs font-bold uppercase tracking-widest text-[#c6a873]">English · Kinyarwanda · Français</p></div></div>
+        <div className="container grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="eyebrow">Paid online surveys worldwide</p><h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-[#f0e9dc] sm:text-4xl">Earn RWF rewards for sharing local knowledge and lived experience.</h2><p className="mt-4 max-w-2xl leading-7 text-[#969198]">Research helps organizations understand the people they serve. ExpertsEarn gives eligible participants in supported locations worldwide a place to discover studies, review reward terms and contribute their views. Study availability, eligibility and reward amounts vary; no earnings are guaranteed.</p><Link href="/how-it-works" className="ghost-button mt-6">See how participation works <ArrowUpRight size={16} /></Link></div><div className="surface max-w-sm p-6"><h3 className="text-lg font-bold text-[#eee7dc]">Research in three languages</h3><p className="mt-3 text-sm leading-7 text-[#969198]">Explore the platform in English, Kinyarwanda or Français. Each research team selects the languages available for its own study.</p><p className="mt-5 text-xs font-bold uppercase tracking-widest text-[#c6a873]">English · Kinyarwanda · Français</p></div></div>
       </section>
 
       <section id="research" className="container py-20">
