@@ -14,8 +14,21 @@ export function AuthForm({ mode, referralCode = "" }: { mode: "login" | "signup"
       ? await supabase.auth.signUp({ email, password, options: { data: { display_name: name, ...(referralCode ? { referral_code: referralCode } : {}) }, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       : await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (result.error) { setError(result.error.message); return; }
-    if (mode === "signup" && !result.data.session) { setConfirmationPending(true); setError("Check your email to confirm your account, then log in."); return; }
+    if (result.error) {
+      if (mode === "login" && result.error.code === "email_not_confirmed") {
+        const resend = await supabase.auth.resend({ type: "signup", email: email.trim() });
+        setBusy(false);
+        setConfirmationPending(true);
+        setError(resend.error
+          ? "Your account still needs email confirmation. We couldn't send another link just now. Please try again shortly."
+          : "Your account is not confirmed yet. We have sent a fresh confirmation link to your email. Open it, confirm your account, then log in again.");
+        return;
+      }
+      setBusy(false);
+      setError(result.error.message);
+      return;
+    }
+    if (mode === "signup" && !result.data.session) { setBusy(false); setConfirmationPending(true); setError("Check your email to confirm your account, then log in."); return; }
     router.push("/welcome"); router.refresh();
   }
   async function resendConfirmation() {
