@@ -9,8 +9,8 @@ type Question = {
   question_bank: { prompt: string; question_type: string; options: any } | null;
 };
 
-export function SurveyRunner({ responseId, questions }: { surveyId: string; responseId: string; questions: Question[] }) {
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+export function SurveyRunner({ responseId, questions, initialAnswers = {} }: { surveyId: string; responseId: string; questions: Question[]; initialAnswers?: Record<string, any> }) {
+  const [answers, setAnswers] = useState<Record<string, any>>(initialAnswers);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState(0);
