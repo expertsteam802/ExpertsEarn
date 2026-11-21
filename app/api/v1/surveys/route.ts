@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return NextResponse.json({ error: "Request body must be a JSON object." }, { status: 400 });
   }
-  if (typeof body.title !== "string" || body.title.trim().length < 3 || body.title.trim().length > 140 || !Array.isArray(body.questions) || body.questions.length < 1 || body.questions.length > 100) {
-    return NextResponse.json({ error: "Provide a title and between 1 and 100 questions" }, { status: 400 });
+  if (typeof body.title !== "string" || body.title.trim().length < 3 || body.title.trim().length > 140 || !Array.isArray(body.questions) || body.questions.length < 5 || body.questions.length > 10) {
+    return NextResponse.json({ error: "Provide a title and between 5 and 10 questions" }, { status: 400 });
   }
 
   const allowed = new Set(["single_choice", "multiple_choice", "text", "number", "rating", "yes_no"]);
@@ -82,13 +82,16 @@ export async function POST(request: NextRequest) {
   const maxAge = body.max_age === undefined || body.max_age === null ? null : Number(body.max_age);
   const rewardRwf = body.reward_rwf === undefined ? 0 : Number(body.reward_rwf);
   const targetGender = body.target_gender ?? null;
-  if (!Number.isSafeInteger(rewardRwf) || rewardRwf < 0 || rewardRwf > 100000 ||
+  const exchangeRate = Number(rateSetting?.value ?? 0);
+  const respondentShare = Number(splitSetting?.value?.partner?.respondent ?? 0);
+  const maxAffordableReward = exchangeRate > 0 ? Math.floor(price * exchangeRate * respondentShare / 100) : 0;
+  if (!Number.isSafeInteger(rewardRwf) || rewardRwf < 0 || rewardRwf > maxAffordableReward ||
       (targetGender !== null && (typeof targetGender !== "string" || !["female", "male", "non_binary", "prefer_not_to_say"].includes(targetGender))) ||
       (responseLimit !== null && (!Number.isInteger(responseLimit) || responseLimit < 1 || responseLimit > 100000)) ||
       (minAge !== null && (!Number.isInteger(minAge) || minAge < 13 || minAge > 100)) ||
       (maxAge !== null && (!Number.isInteger(maxAge) || maxAge < 13 || maxAge > 100)) ||
       (minAge !== null && maxAge !== null && minAge > maxAge)) {
-    return NextResponse.json({ error: "Response limit, reward and age targeting values are invalid." }, { status: 400 });
+    return NextResponse.json({ error: "Response limit, reward funding or age targeting values are invalid. Ensure the reward fits the funded respondent share and set a response limit." }, { status: 400 });
   }
 
   const surveyPayload = {
