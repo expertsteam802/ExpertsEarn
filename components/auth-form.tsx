@@ -24,6 +24,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     <label className="block text-sm font-semibold text-slate-700">Password<input required minLength={8} type="password" value={password} onChange={e=>setPassword(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-forest" placeholder="At least 8 characters"/></label>
     {error && <p role="alert" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{error}</p>}
     <button disabled={busy} className="w-full rounded-xl bg-forest px-5 py-3.5 font-bold text-white disabled:opacity-60">{busy ? "Please wait…" : mode === "signup" ? "Create free account" : "Log in"}</button>
+    {mode === "login" && <p className="text-right text-sm"><Link className="font-bold text-forest" href="/forgot-password">Forgot password?</Link></p>}
     <p className="text-center text-sm text-slate-500">{mode === "signup" ? "Already have an account?" : "New to ExpertsEarn?"} <Link className="font-bold text-forest" href={mode === "signup" ? "/login" : "/signup"}>{mode === "signup" ? "Log in" : "Join free"}</Link></p>
   </form>;
 }
