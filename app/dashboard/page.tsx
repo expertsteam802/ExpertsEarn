@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export default async function DashboardPage(){
  const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ await supabase.rpc("claim_referral_rewards");
  const [{data:profile},{data:wallet},{data:allSurveys},{data:responses},{data:ecSetting}]=await Promise.all([
   supabase.from("profiles").select("display_name,avatar_url,role,country_code,province,district,sector,cell,village,region,city,gender,date_of_birth,account_status,account_locked_until,account_status_reason").eq("id",user.id).maybeSingle(),
   supabase.from("wallets").select("balance_rwf,lifetime_earned_rwf,balance_ec,lifetime_earned_ec").eq("user_id",user.id).maybeSingle(),
