@@ -34,11 +34,28 @@ export function AdFirstClickLink({ href, className, children, label = "Continue"
     const height = 640;
     const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - width) / 2));
     const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - height) / 2));
-    window.open(
-      DIRECT_LINK,
+
+    // Open a blank window synchronously during the user gesture, then navigate
+    // it. This is more popup-blocker-friendly than opening the ad URL directly.
+    const popup = window.open(
+      "about:blank",
       "expertsEarnDirectLinkPopup",
       `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`,
     );
+
+    if (!popup) {
+      window.alert("Your browser blocked the advertisement popup. Please allow popups for ExpertsEarn, then click again to continue.");
+      return;
+    }
+
+    try {
+      popup.opener = null;
+      popup.location.replace(DIRECT_LINK);
+    } catch {
+      popup.close();
+      window.alert("The advertisement window could not be opened. Please allow popups for ExpertsEarn and try again.");
+      return;
+    }
 
     try {
       window.sessionStorage.setItem(`expertsEarnAd:${href}`, "opened");
