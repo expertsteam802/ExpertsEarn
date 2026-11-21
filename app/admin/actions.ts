@@ -94,9 +94,11 @@ export async function updatePlatformSetting(formData: FormData) {
 export async function updateSurveyTerms(formData: FormData) {
   const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
   if(!user) return {ok:false,error:"Please sign in again."};
-  const surveyId=String(formData.get("survey_id")||""); const reward=Number(formData.get("reward_rwf"));
+  const surveyId=String(formData.get("survey_id")||""); const rewardEc=Number(formData.get("reward_ec"));
   const limitRaw=String(formData.get("response_limit")||"").trim(); const limit=limitRaw?Number(limitRaw):null;
-  if(!surveyId||!Number.isInteger(reward)||(limit!==null&&!Number.isInteger(limit))) return {ok:false,error:"Enter a valid reward and response cap."};
+  const {data:rateRow}=await supabase.from("platform_settings").select("value").eq("key","expertscoins_per_rwf").maybeSingle();
+  const ecRate=Math.max(0.000001,Number(rateRow?.value??1)); const reward=Math.round(rewardEc/ecRate);
+  if(!surveyId||!Number.isFinite(rewardEc)||rewardEc<0||reward>1000000||(rewardEc>0&&reward<1)||(limit!==null&&!Number.isInteger(limit))) return {ok:false,error:"Enter a valid ExpertsCoins reward and response cap."};
   const {error}=await supabase.rpc("admin_update_survey_terms",{p_survey_id:surveyId,p_reward_rwf:reward,p_response_limit:limit});
   return error?{ok:false,error:error.message}:{ok:true,message:"Survey terms saved."};
 }
@@ -114,9 +116,11 @@ export async function bulkUpdateSurveyRewards(formData: FormData) {
   const {data:{user}}=await supabase.auth.getUser();
   if(!user) return {ok:false,error:"Please sign in again."};
   const ids=formData.getAll("survey_ids").map(String).filter(Boolean);
-  const rewardRaw=String(formData.get("reward_rwf")??"").trim();
-  const reward=Number(rewardRaw);
-  if(!ids.length||ids.length>50||!rewardRaw||!Number.isSafeInteger(reward)||reward<0||reward>1000000) return {ok:false,error:"Select 1–50 draft or paused surveys and enter a reward from 0 to 1,000,000 RWF."};
+  const rewardRaw=String(formData.get("reward_ec")??"").trim();
+  const rewardEc=Number(rewardRaw);
+  const {data:rateRow}=await supabase.from("platform_settings").select("value").eq("key","expertscoins_per_rwf").maybeSingle();
+  const ecRate=Math.max(0.000001,Number(rateRow?.value??1)); const reward=Math.round(rewardEc/ecRate);
+  if(!ids.length||ids.length>50||!rewardRaw||!Number.isFinite(rewardEc)||rewardEc<0||reward>1000000||(rewardEc>0&&reward<1)) return {ok:false,error:"Select 1–50 draft or paused surveys and enter a valid ExpertsCoins reward."};
   const {data:surveys,error:loadError}=await supabase.from("surveys").select("id,response_limit,status").in("id",ids);
   if(loadError||!surveys||surveys.length!==ids.length) return {ok:false,error:loadError?.message||"Could not load the selected surveys."};
   if(surveys.some(s=>!["draft","paused"].includes(s.status))) return {ok:false,error:"Pause active surveys before changing their rewards."};
