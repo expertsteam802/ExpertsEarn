@@ -8,7 +8,7 @@ export async function requestPayout(formData: FormData) {
  const amount=Number(formData.get("amount"));
  const method=String(formData.get("method")||"");
  const destination=String(formData.get("destination")||"").trim();
- if(!Number.isSafeInteger(amount)||amount<1000||!destination) redirect("/wallet/payout?error=invalid");
+ if(!Number.isSafeInteger(amount)||amount<1||!destination) redirect("/wallet/payout?error=invalid");
  const {data:requestId,error}=await supabase.rpc("request_payout",{p_amount_rwf:amount,p_method:method,p_destination:destination});
  if(error) redirect("/wallet/payout?error="+encodeURIComponent(error.message));
  if(typeof requestId!=="string"||!requestId) redirect("/wallet/payout?error=request_id_missing");
