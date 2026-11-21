@@ -14,6 +14,18 @@ export async function updatePayout(formData:FormData){
  if(error)redirect("/admin?tab=payouts&error="+encodeURIComponent(error.message));
  redirect("/admin?tab=payouts&updated=1");
 }
+export async function adjustPartnerCredit(formData:FormData){
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
+ await requireAdmin(supabase,user.id);
+ const partnerId=String(formData.get("partner_id")||"");
+ const amount=Number(formData.get("amount_usd"));
+ const note=String(formData.get("note")||"").trim();
+ if(!partnerId||!Number.isFinite(amount)||amount<=0||amount>100000)redirect("/admin?tab=partners&error=invalid_credit");
+ const {error}=await supabase.rpc("admin_adjust_partner_credit",{p_partner_account_id:partnerId,p_amount_usd:amount,p_note:note||null});
+ if(error)redirect("/admin?tab=partners&error="+encodeURIComponent(error.message));
+ redirect("/admin?tab=partners&credit_added=1");
+}
+
 export async function approvePartner(formData:FormData){
  const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/login");
  await requireAdmin(supabase,user.id);
