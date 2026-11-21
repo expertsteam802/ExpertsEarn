@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const highlights = [
   { icon: Wallet, title: "A clear rewards ledger", copy: "See verified earnings, pending payouts and every wallet movement in one place." },
   { icon: ShieldCheck, title: "Designed for trusted research", copy: "Eligibility checks and response-quality controls help protect the value of every study." },
-  { icon: Globe2, title: "Local voices. Global insight.", copy: "Reach respondents across Rwanda and international markets with targeted research." },
+  { icon: Globe2, title: "Local voices. Global insight.", copy: "Reach respondents across supported locations worldwide with targeted research." },
 ];
 
 const faqs = [
