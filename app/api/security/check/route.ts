@@ -20,7 +20,7 @@ export async function POST() {
   const country = safeHeader(requestHeaders.get("x-vercel-ip-country"), 2)?.toUpperCase() ?? null;
   const region = safeHeader(requestHeaders.get("x-vercel-ip-country-region"), 40);
   const city = safeHeader(requestHeaders.get("x-vercel-ip-city"), 80);
-  const ip = safeHeader(requestHeaders.get("x-real-ip") ?? requestHeaders.get("x-forwarded-for")?.split(",")[0] ?? null, 100);
+  const ip = safeHeader(requestHeaders.get("x-real-ip"), 100);
   const secret = process.env.IP_HASH_SECRET;
   const ipHash = ip && secret ? createHmac("sha256", secret).update(ip).digest("hex") : null;
   const userAgent = safeHeader(requestHeaders.get("user-agent"), 400);
