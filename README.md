@@ -38,3 +38,5 @@ See [Partner API documentation](/docs/partner-api). New partner applications mus
 
 ## Deployment
 Import this repository into Vercel and configure the environment variables above for Production and Preview. The app supports the modern Supabase integration variable names and legacy anon/service-role names. Environment variable changes require a new deployment. After connecting the production domain in Vercel, assign it to the production deployment and verify DNS and HTTPS.
+
+<!-- Production deployment trigger: 2026-11-21; deploy the main branch. -->
