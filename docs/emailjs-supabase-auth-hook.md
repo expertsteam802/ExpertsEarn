@@ -36,7 +36,7 @@ The Supabase Send Email Hook must remain disabled until all secrets are configur
 
 When ready, open Supabase Dashboard → Authentication → Hooks → Send Email Hook and configure the HTTP Hook URL:
 
-`https://jaimcybsmrzktuglpxlqpt.supabase.co/functions/v1/experts-earn-auth-email`
+`https://jaimcybsmrzktuglpxmd.supabase.co/functions/v1/experts-earn-auth-email`
 
 Use the actual project URL shown in Supabase if it differs. Keep email signups and email confirmation enabled.
 
