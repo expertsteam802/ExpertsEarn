@@ -69,7 +69,8 @@ Deno.serve(async req=>{
   if(!event)throw new Error("Webhook signature verification failed for configured signing secrets");
   const action=event.email_data?.email_action_type,email=event.user?.email?.trim();
   if(!action||!email)throw new Error("Invalid Supabase Auth Hook payload");
-  const name=(event.user.user_metadata?.display_name??event.user.user_metadata?.full_name??"there").replace(/[<>\r\n]/g,"").slice(0,80)||"there";
+  const rawName=event.user.user_metadata?.first_name??event.user.user_metadata?.display_name??event.user.user_metadata?.full_name??event.user.user_metadata?.name??"";
+  const name=rawName.trim().split(/\s+/)[0].replace(/[<>\r\n]/g,"").slice(0,50)||"there";
   const d=event.email_data;
   const red=action==="recovery"?new URL("/reset-password",APP_URL).toString():redirect(d.redirect_to);
   if(action==="email_change"){
